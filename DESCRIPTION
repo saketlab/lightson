@@ -1,0 +1,42 @@
+Package: lightson
+Title: Download and Analyse Nighttime Lights Satellite Data
+Version: 0.1.0
+Authors@R:
+    person("Saket", "Choudhary",
+           email = "saketkc@gmail.com",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7866-5932"))
+Description: Unified interface for downloading and processing nighttime lights
+    (NTL) satellite data from multiple sources: NASA VIIRS/Black Marble
+    (VNP46A4 annual composites) and India's ISRO Bhuvan NTL portal. Provides
+    bhuvan_stats() for instant pre-aggregated state-level radiance from the
+    Bhuvan REST API, bhuvan_raster() for WMS GeoTIFF tiles compatible with
+    any custom sf geometry, extract_panel() for tidy long-format zonal
+    statistics ready for econometric panel regression, and convenience
+    functions for Indian administrative boundaries.
+License: MIT + file LICENSE
+Depends: R (>= 4.1.0)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+    httr2 (>= 1.0.0),
+    terra (>= 1.7.0),
+    sf (>= 1.0.0),
+    jsonlite,
+    digest
+Suggests:
+    geodata,
+    ggplot2,
+    patchwork,
+    scales,
+    httptest2,
+    pkgdown,
+    withr,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://saketkc.github.io/lightson/, https://github.com/saketkc/lightson
+BugReports: https://github.com/saketkc/lightson/issues

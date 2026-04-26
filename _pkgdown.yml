@@ -1,0 +1,152 @@
+url: https://saketkc.github.io/lightson/
+
+development:
+  mode: auto
+
+template:
+  bootstrap: 5
+  light-switch: true
+  preset: default
+  bslib:
+    primary: "#c07828"
+    secondary: "#6b7689"
+    body-bg: "#f8f7f9"
+    body-color: "#171923"
+    border-color: "#dcdae0"
+    border-radius: "6px"
+    font-size-base: "1rem"
+    headings-font-weight: "700"
+  includes:
+    in_header: |
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..500&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <script>
+        (function(){
+          var stored = localStorage.getItem('bs-color-scheme');
+          if (!stored) {
+            stored = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-bs-theme', stored);
+        })();
+      </script>
+      <meta name="keywords" content="nighttime lights, NTL, satellite data, India, VIIRS, Bhuvan, R package, spatial analysis, electrification, economic activity">
+      <meta name="author" content="Saket Choudhary">
+      <meta name="robots" content="index, follow">
+      <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+      <link rel="canonical" href="https://saketkc.github.io/lightson/">
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="https://saketkc.github.io/lightson/">
+      <meta property="og:title" content="lightson — Nighttime Lights Data for R">
+      <meta property="og:description" content="R package for downloading and analysing nighttime lights satellite data from NASA VIIRS and India's Bhuvan NTL portal. Tidy panel output ready for econometrics.">
+      <meta property="og:site_name" content="lightson">
+      <meta property="og:locale" content="en_US">
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="lightson — Nighttime Lights Data for R">
+      <meta name="twitter:description" content="Download VIIRS and Bhuvan NTL data, extract tidy panel statistics over any sf geometry, and plot trends — in under 10 lines of R.">
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "lightson",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Windows, macOS, Linux",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "R package for downloading and processing nighttime lights satellite data from NASA VIIRS/Black Marble and India's ISRO Bhuvan NTL portal, with tidy panel output for econometric analysis.",
+        "author": {
+          "@type": "Person",
+          "name": "Saket Choudhary",
+          "url": "https://saketlab.org"
+        },
+        "url": "https://saketkc.github.io/lightson/",
+        "downloadUrl": "https://github.com/saketkc/lightson",
+        "softwareVersion": "0.1.0",
+        "programmingLanguage": "R"
+      }
+      </script>
+
+home:
+  title: "lightson — Nighttime Lights Data for R"
+  description: >
+    R package for downloading and analysing nighttime lights (NTL) satellite
+    data. Unified interface for NASA VIIRS/Black Marble annual composites and
+    India's ISRO Bhuvan NTL portal.
+
+  links:
+  - text: Browse source code
+    href: https://github.com/saketkc/lightson
+  - text: Report a bug
+    href: https://github.com/saketkc/lightson/issues
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [search, github, lightswitch]
+
+  components:
+    reference:
+      text: Reference
+      href: reference/index.html
+
+    articles:
+      text: Articles
+      menu:
+      - text: State-level NTL with Bhuvan
+        href: articles/india-bhuvan-states.html
+      - text: India electrification trends with VIIRS
+        href: articles/india-electrification.html
+      - text: "Custom geometry: district-level NTL with custom boundaries"
+        href: articles/custom-geometry.html
+
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/saketkc/lightson
+      aria-label: GitHub
+
+reference:
+- title: "Download"
+  desc: "Fetch nighttime lights rasters from remote sources"
+  contents:
+  - ntl_download
+  - bhuvan_raster
+  - bhuvan_stats
+
+- title: "Analysis"
+  desc: "Compute zonal statistics over spatial polygons"
+  contents:
+  - extract_panel
+
+- title: "Visualisation"
+  desc: "Plot trends and maps"
+  contents:
+  - plot_ntl_trend
+  - plot_ntl_map
+  - plot_ntl_panel
+  - theme_ntl
+
+- title: "Boundaries"
+  desc: "Indian administrative boundaries"
+  contents:
+  - get_india_admin
+
+- title: "Auth & Cache"
+  desc: "Authentication and local cache management"
+  contents:
+  - earthdata_token
+  - cache_clear
+
+authors:
+  Saket Choudhary:
+    href: https://github.com/saketkc
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with
+  components:
+    developed_by: "Developed by [Saket Choudhary](https://saketlab.org)"
+    built_with: "Built with [pkgdown](https://pkgdown.r-lib.org/)"

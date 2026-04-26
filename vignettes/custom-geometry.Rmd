@@ -1,0 +1,137 @@
+---
+title: "Custom geometry: district-level NTL with custom boundaries"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Custom geometry: district-level NTL with custom boundaries}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
+
+`lightson` accepts any `sf` polygon layer. The workflow below starts with the
+bundled LGD state boundaries, then swaps in district-level GeoJSONs from
+[bharatviz](https://github.com/saketlab/bharatviz).
+
+## State-level workflow (bundled boundaries)
+
+```{r state-boundaries}
+library(lightson)
+library(sf)
+
+states <- get_india_admin("state")
+nrow(states)
+head(states[, c("state_name", "state_code")])
+```
+
+Download Bhuvan WMS rasters for a subset of years. `bhuvan_raster()` derives
+the bounding box from the geometry:
+
+```{r state-rasters}
+rasters <- bhuvan_raster(states, years = 2020:2022)
+names(rasters)
+rasters[["2022"]]
+```
+
+Bhuvan WMS returns RGB visualisation tiles, not physical radiance.
+`bhuvan_raster()` converts to single-band luminance via
+`lum = 0.2126*R + 0.7152*G + 0.0722*B` (ITU-R BT.709). Values are
+comparable across years for trend analysis but are not in nW/cm^2/sr.
+
+```{r state-panel}
+panel <- extract_panel(rasters, states, id_col = "state_name")
+head(panel)
+```
+
+```{r state-trend, fig.width = 7, fig.height = 4}
+library(ggplot2)
+sel <- c("Bihar", "Maharashtra", "Tamil Nadu", "Uttar Pradesh")
+plot_ntl_trend(
+  panel[panel$region_id %in% sel, ],
+  region   = sel,
+  caption  = "Source: ISRO Bhuvan NTL portal"
+)
+```
+
+```{r state-map, fig.width = 7, fig.height = 6}
+plot_ntl_map(
+  rasters[["2022"]],
+  polygons = states,
+  title    = "India nighttime lights, 2022",
+  dark     = TRUE
+)
+```
+
+
+## District-level workflow
+
+```{r}
+BHARATVIZ <- "https://bharatviz.org"
+
+districts <- tryCatch(
+  sf::read_sf(file.path(BHARATVIZ, "India-bhuvan-districts.geojson")),
+  error = function(e) NULL
+)
+if (is.null(districts)) {
+  message("bharatviz not reachable -- skipping district examples")
+  knitr::opts_chunk$set(eval = FALSE)
+}
+nrow(districts)
+```
+
+```{r download-rasters}
+rasters_dist <- bhuvan_raster(districts, years = 2018:2023)
+names(rasters_dist)
+```
+
+```{r extract-panel}
+panel_dist <- extract_panel(rasters_dist, districts, id_col = "district_name")
+head(panel_dist)
+```
+
+```{r plot-trend, fig.width = 7, fig.height = 4}
+plot_ntl_trend(panel_dist, region = c("Mumbai", "Delhi", "Chennai", "Bengaluru"))
+```
+
+```{r plot-map, fig.width = 7, fig.height = 6}
+plot_ntl_map(rasters_dist[["2022"]], polygons = districts)
+```
+
+### LGD boundaries
+
+```{r lgd}
+lgd <- sf::read_sf(file.path(BHARATVIZ, "India_LGD_districts.geojson"))
+panel_lgd <- extract_panel(rasters_dist, lgd, id_col = "district_name")
+head(panel_lgd)
+```
+
+### Historical census boundaries
+
+```{r historical}
+dist_2011 <- sf::read_sf(file.path(BHARATVIZ, "India-2011-districts.geojson"))
+panel_2011 <- extract_panel(rasters_dist, dist_2011)
+head(panel_2011)
+```
+
+`extract_panel()` picks the first character column as `region_id` automatically,
+or pass `id_col` explicitly.
+
+---
+
+## VIIRS path
+
+To use NASA VIIRS rasters, supply an [Earthdata token](https://urs.earthdata.nasa.gov/):
+
+```{r viirs}
+token <- earthdata_token()
+rasters_viirs <- ntl_download("viirs", region = districts, years = 2018:2023, token = token)
+if (length(rasters_viirs) > 0) {
+  panel_viirs <- extract_panel(rasters_viirs, districts, id_col = "district_name")
+  head(panel_viirs)
+}
+```
