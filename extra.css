@@ -1,0 +1,353 @@
+:root {
+  --ntl-amber:      oklch(72% 0.18 62);
+  --ntl-amber-dim:  oklch(62% 0.14 62);
+  --ntl-navy:       oklch(14% 0.02 240);
+
+  --ntl-bg:         oklch(98.5% 0.004 240);
+  --ntl-bg-2:       oklch(96% 0.006 240);
+  --ntl-text:       oklch(18% 0.015 240);
+  --ntl-text-muted: oklch(48% 0.012 240);
+  --ntl-border:     oklch(88% 0.008 240);
+
+  --code-bg:        oklch(17% 0.02 240);
+  --code-fg:        oklch(88% 0.015 240);
+  --code-border:    oklch(25% 0.025 240);
+  --code-inline-bg: oklch(93% 0.008 240);
+  --code-inline-fg: oklch(24% 0.03 240);
+
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  48px;
+  --space-2xl: 80px;
+}
+
+[data-bs-theme="dark"] {
+  --ntl-bg:         oklch(12% 0.018 240);
+  --ntl-bg-2:       oklch(16% 0.02 240);
+  --ntl-text:       oklch(86% 0.012 240);
+  --ntl-text-muted: oklch(56% 0.012 240);
+  --ntl-border:     oklch(26% 0.022 240);
+
+  --code-inline-bg: oklch(20% 0.025 240);
+  --code-inline-fg: oklch(78% 0.12 60);
+
+  --bs-body-bg:         var(--ntl-bg);
+  --bs-body-color:      var(--ntl-text);
+  --bs-secondary-bg:    var(--ntl-bg-2);
+  --bs-tertiary-bg:     oklch(19% 0.022 240);
+  --bs-border-color:    var(--ntl-border);
+  --bs-secondary-color: var(--ntl-text-muted);
+}
+
+body {
+  font-family: "Albert Sans", system-ui, -apple-system, sans-serif;
+  background-color: var(--ntl-bg);
+  color: var(--ntl-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.template-article .contents,
+.template-home .contents {
+  font-family: "Literata", Georgia, serif;
+  font-optical-sizing: auto;
+  font-size: 1.025rem;
+  line-height: 1.75;
+}
+
+.template-article .contents p,
+.template-home .contents p {
+  max-width: 68ch;
+}
+
+h1 {
+  font-family: "Albert Sans", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--ntl-text);
+}
+
+h2, h3, h4, h5 {
+  font-family: "Albert Sans", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ntl-text);
+}
+
+h1 { font-size: 2.1rem; margin-bottom: var(--space-md); }
+h2 { font-size: 1.45rem; margin-top: var(--space-xl); margin-bottom: var(--space-md); }
+h3 { font-size: 1.15rem; font-weight: 650; margin-top: var(--space-lg); }
+
+code, pre, kbd, samp, .sourceCode {
+  font-family: "Fira Code", "Cascadia Code", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+.navbar {
+  background-color: var(--ntl-bg) !important;
+  padding: 0.6rem 0;
+  box-shadow: 0 1px 0 var(--ntl-border);
+  border-bottom: none !important;
+}
+
+.navbar-brand {
+  font-family: "Albert Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  color: var(--ntl-text) !important;
+}
+
+.navbar-brand::after {
+  content: "·";
+  color: var(--ntl-amber);
+  margin-left: 0.15em;
+  font-weight: 900;
+}
+
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ntl-text-muted) !important;
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--ntl-text) !important;
+}
+
+[data-bs-theme="dark"] .navbar {
+  background-color: var(--ntl-navy) !important;
+  box-shadow: 0 1px 0 var(--ntl-border);
+}
+
+.template-home .page-header {
+  padding: var(--space-xl) 0 var(--space-lg);
+  border-bottom: 1px solid var(--ntl-border);
+  margin-bottom: var(--space-xl);
+}
+
+.template-home .page-header h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+/* Code blocks are always dark — terminal feel regardless of page theme */
+pre,
+pre.sourceCode,
+div.sourceCode,
+.highlight {
+  background-color: var(--code-bg) !important;
+  border: 1px solid var(--code-border) !important;
+  border-radius: 6px !important;
+  font-size: 0.83rem !important;
+  line-height: 1.6 !important;
+  padding: var(--space-md) var(--space-lg) !important;
+  overflow-x: auto;
+}
+
+/* Set the light foreground on the code element itself so all child spans
+   that have no highlight class inherit it correctly */
+pre > code,
+pre.sourceCode > code,
+div.sourceCode pre > code {
+  color: var(--code-fg) !important;
+  background: transparent !important;
+}
+
+/* Token colours */
+.sourceCode .co { color: oklch(52% 0.01 240) !important; }
+.sourceCode .kw { color: oklch(72% 0.18 62) !important; }
+.sourceCode .st { color: oklch(76% 0.15 150) !important; }
+.sourceCode .fu { color: oklch(74% 0.14 220) !important; }
+.sourceCode .dv { color: oklch(72% 0.12 30) !important; }
+
+p code, li code, td code, h1 code, h2 code, h3 code, dt code {
+  font-size: 0.85em;
+  padding: 0.12em 0.38em;
+  border-radius: 3px;
+  background-color: var(--code-inline-bg) !important;
+  color: var(--code-inline-fg) !important;
+}
+
+.btn-copy-ex {
+  background-color: transparent;
+  border: 1px solid var(--code-border);
+  color: oklch(55% 0.01 240);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  right: var(--space-sm);
+  top: var(--space-sm);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-copy-ex:hover {
+  color: var(--ntl-amber);
+  border-color: var(--ntl-amber-dim);
+}
+
+.ref-index td {
+  vertical-align: top;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.ref-index h2 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--ntl-text-muted);
+  border-bottom: 1px solid var(--ntl-border);
+  padding-bottom: 0.35rem;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.template-reference-index .row {
+  gap: var(--space-md);
+}
+
+.template-reference-topic .page-header {
+  border-bottom: 1px solid var(--ntl-border);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.template-reference-topic dt {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--ntl-text-muted);
+  margin-top: var(--space-lg);
+}
+
+.template-reference-topic dd {
+  margin-left: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.template-home aside {
+  font-size: 0.875rem;
+  color: var(--ntl-text-muted);
+}
+
+.template-home aside h2 {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 700;
+  color: var(--ntl-text-muted);
+  border-bottom: 1px solid var(--ntl-border);
+  padding-bottom: 0.3rem;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+}
+
+.template-home aside a {
+  color: var(--ntl-text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.template-home aside a:hover {
+  color: var(--ntl-amber);
+}
+
+.template-article-index .card {
+  border: 1px solid var(--ntl-border);
+  border-radius: 6px;
+  background: var(--ntl-bg-2);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.template-article-index .card:hover {
+  box-shadow: 0 4px 16px -4px color-mix(in oklch, var(--ntl-navy) 40%, transparent);
+  transform: translateY(-1px);
+}
+
+.template-article-index .card-body {
+  padding: var(--space-lg);
+}
+
+.template-article h1 {
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+.template-article .page-header {
+  border-bottom: 1px solid var(--ntl-border);
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.template-article h2 + p,
+.template-article h3 + p {
+  margin-top: var(--space-sm);
+}
+
+.template-article table {
+  font-size: 0.9rem;
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--space-lg) 0;
+}
+
+.template-article th {
+  font-weight: 600;
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 2px solid var(--ntl-border);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ntl-text-muted);
+}
+
+.template-article td {
+  padding: var(--space-xs) var(--space-md);
+  border-bottom: 1px solid var(--ntl-border);
+  vertical-align: top;
+}
+
+footer {
+  font-size: 0.8rem;
+  color: var(--ntl-text-muted);
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--ntl-border);
+}
+
+footer a {
+  color: var(--ntl-text-muted);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--ntl-amber);
+}
+
+@media (min-width: 1200px) {
+  .container-xxl { max-width: 1140px; }
+}
+
+a.anchor {
+  color: var(--ntl-amber-dim);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+h2:hover a.anchor,
+h3:hover a.anchor {
+  opacity: 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ntl-amber);
+  outline-offset: 3px;
+}

@@ -1,0 +1,38 @@
+# India electrification trends with VIIRS
+
+## Get a NASA Earthdata token
+
+1.  Register at <https://urs.earthdata.nasa.gov/>
+2.  Go to Profile → Generate Token
+3.  `Sys.setenv(EARTHDATA_TOKEN = "YOUR_TOKEN")`, or pass the token
+    directly to `earthdata_token("TOKEN")`
+
+Tiles are cached in `~/.lightson/cache/` after the first download.
+
+## Quick workflow
+
+``` r
+
+library(lightson)
+
+token <- earthdata_token()
+rasters <- ntl_download("viirs", region = "IND", years = 2015:2023, token = token)
+districts <- get_india_admin(level = "district")
+panel <- extract_panel(rasters, districts)
+plot_ntl_trend(panel, region = "Lucknow")
+```
+
+## Use your own shape/boundary file
+
+[`extract_panel()`](https://saketkc.github.io/lightson/reference/extract_panel.md)
+accepts any `sf` object:
+
+``` r
+
+library(sf)
+my_districts <- sf::read_sf("~/github/bharatviz/public/India_LGD_districts.geojson")
+panel2 <- extract_panel(rasters, my_districts, id_col = "district_name")
+```
+
+See the *Custom geometry* vignette for a complete walkthrough using
+bharatviz boundaries with Bhuvan NTL rasters — no NASA token required.
