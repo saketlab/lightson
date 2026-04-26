@@ -92,6 +92,8 @@ bhuvan_stats <- function(years = NULL, state = NULL) {
 bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1024,
                           bbox_pad = c(0, 0, 0, 0)) {
   .warn_collection_break(as.integer(years))
+
+  region <- .resolve_region(region)
   bbox <- .region_to_bbox(region)
   pad <- rep_len(bbox_pad, 4)
   bbox["xmin"] <- bbox["xmin"] - pad[1]
@@ -100,6 +102,8 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
   bbox["ymax"] <- bbox["ymax"] + pad[4]
   bbox_hash <- .short_hash(paste(bbox, collapse = "_"))
   cache_d <- .cache_dir()
+
+  mv <- .region_mask(region)
 
   result <- lapply(as.integer(years), function(yr) {
     key <- paste0("bhuvan_", bbox_hash, "_", yr)
@@ -117,6 +121,7 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
     }
 
     lum <- .rgb_to_luminance(r)
+    if (!is.null(mv)) lum <- terra::mask(lum, mv)
     terra::writeRaster(lum, path, overwrite = TRUE)
     lum
   })

@@ -10,7 +10,7 @@ plot_ntl_map(
   title = "Nighttime lights",
   caption = NULL,
   palette = c("glow", "bhuvan"),
-  dark = FALSE,
+  dark = TRUE,
   limits = NULL
 )
 }
@@ -28,7 +28,7 @@ returned by \code{\link[=ntl_download]{ntl_download()}} or \code{\link[=bhuvan_r
 
 \item{dark}{Logical. If \code{TRUE}, the plot background is \verb{#080c14} (deep navy)
 and text is light. Ignored when \code{palette = "bhuvan"} (always dark bg).
-Default \code{FALSE}.}
+Default \code{TRUE}.}
 
 \item{limits}{Numeric vector of length 2 for the continuous scale. Only used
 when \code{palette = "glow"}. \code{NULL} uses the raster min/max. Set

@@ -72,16 +72,34 @@ cache_clear <- function(source = NULL) {
   }
 }
 
-.region_to_bbox <- function(region) {
+.resolve_region <- function(region) {
   if (is.character(region) && nchar(region) == 3) {
     if (!requireNamespace("geodata", quietly = TRUE)) {
       stop("Install the 'geodata' package to use ISO country codes as regions.", call. = FALSE)
     }
-    region <- geodata::gadm(country = region, level = 0, path = .cache_dir())
+    return(geodata::gadm(country = region, level = 0, path = .cache_dir()))
   }
+  region
+}
+
+.region_to_bbox <- function(region) {
+  region <- .resolve_region(region)
   if (inherits(region, "sf")) {
     bb <- sf::st_bbox(sf::st_transform(region, 4326))
     return(c(xmin = bb[["xmin"]], xmax = bb[["xmax"]], ymin = bb[["ymin"]], ymax = bb[["ymax"]]))
   }
-  as.vector(terra::ext(region)) # order: xmin xmax ymin ymax
+  as.vector(terra::ext(region))
+}
+
+.region_mask <- function(region) {
+  if (!inherits(region, c("sf", "sfc", "SpatVector"))) {
+    return(NULL)
+  }
+  if (inherits(region, "SpatVector")) {
+    return(region)
+  }
+  tryCatch(
+    terra::vect(sf::st_union(sf::st_make_valid(region))),
+    error = function(e) NULL
+  )
 }

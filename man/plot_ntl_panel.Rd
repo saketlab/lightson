@@ -59,8 +59,10 @@ Requires the \pkg{patchwork} package.
 \examples{
 \dontrun{
 rasters <- bhuvan_raster("IND", years = c(2012, 2015, 2018, 2021, 2024))
-states  <- get_india_admin("state")
-plot_ntl_panel(rasters, polygons = states, title = "India at night, 2012-2024",
-               caption = "Source: ISRO Bhuvan NTL portal")
+states <- get_india_admin("state")
+plot_ntl_panel(rasters,
+  polygons = states, title = "India at night, 2012-2024",
+  caption = "Source: ISRO Bhuvan NTL portal"
+)
 }
 }

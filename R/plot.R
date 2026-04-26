@@ -151,7 +151,7 @@ plot_ntl_trend <- function(panel,
 #' @param palette One of `"glow"` (default) or `"bhuvan"`.
 #' @param dark Logical. If `TRUE`, the plot background is `#080c14` (deep navy)
 #'   and text is light. Ignored when `palette = "bhuvan"` (always dark bg).
-#'   Default `FALSE`.
+#'   Default `TRUE`.
 #' @param limits Numeric vector of length 2 for the continuous scale. Only used
 #'   when `palette = "glow"`. `NULL` uses the raster min/max. Set
 #'   explicitly when comparing multiple panels on the same scale.
@@ -168,7 +168,7 @@ plot_ntl_map <- function(raster,
                          title = "Nighttime lights",
                          caption = NULL,
                          palette = c("glow", "bhuvan"),
-                         dark = FALSE,
+                         dark = TRUE,
                          limits = NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Install the 'ggplot2' package to use plot_ntl_map().", call. = FALSE)
@@ -325,21 +325,23 @@ plot_ntl_map <- function(raster,
 #' @examples
 #' \dontrun{
 #' rasters <- bhuvan_raster("IND", years = c(2012, 2015, 2018, 2021, 2024))
-#' states  <- get_india_admin("state")
-#' plot_ntl_panel(rasters, polygons = states, title = "India at night, 2012-2024",
-#'                caption = "Source: ISRO Bhuvan NTL portal")
+#' states <- get_india_admin("state")
+#' plot_ntl_panel(rasters,
+#'   polygons = states, title = "India at night, 2012-2024",
+#'   caption = "Source: ISRO Bhuvan NTL portal"
+#' )
 #' }
 plot_ntl_panel <- function(rasters,
-                           polygons         = NULL,
-                           title            = "India at night",
-                           subtitle         = NULL,
-                           caption          = NULL,
-                           palette          = c("glow", "bhuvan"),
-                           ncol             = 3L,
-                           bg_colour        = "#080c14",
-                           title_colour     = "#CDD9E5",
-                           subtitle_colour  = "#8B949E",
-                           year_colour      = "#E8A87C") {
+                           polygons = NULL,
+                           title = "India at night",
+                           subtitle = NULL,
+                           caption = NULL,
+                           palette = c("glow", "bhuvan"),
+                           ncol = 3L,
+                           bg_colour = "#080c14",
+                           title_colour = "#CDD9E5",
+                           subtitle_colour = "#8B949E",
+                           year_colour = "#E8A87C") {
   if (!requireNamespace("patchwork", quietly = TRUE)) {
     stop("Install the 'patchwork' package to use plot_ntl_panel().", call. = FALSE)
   }
@@ -354,7 +356,6 @@ plot_ntl_panel <- function(rasters,
       polygons = polygons,
       title    = yr,
       palette  = palette,
-      dark     = TRUE,
       limits   = if (palette == "glow") lim else NULL
     ) +
       ggplot2::theme(
@@ -369,24 +370,24 @@ plot_ntl_panel <- function(rasters,
   patchwork::wrap_plots(panels, ncol = ncol) +
     patchwork::plot_layout(guides = "collect") &
     patchwork::plot_annotation(
-      title    = title,
+      title = title,
       subtitle = subtitle,
-      caption  = caption,
-      theme    = ggplot2::theme(
+      caption = caption,
+      theme = ggplot2::theme(
         plot.background = ggplot2::element_rect(fill = bg_colour, colour = NA),
-        plot.title      = ggplot2::element_text(
+        plot.title = ggplot2::element_text(
           colour = title_colour, face = "bold", size = 15,
           margin = ggplot2::margin(b = 4)
         ),
-        plot.subtitle   = ggplot2::element_text(
+        plot.subtitle = ggplot2::element_text(
           colour = subtitle_colour, size = 9,
           margin = ggplot2::margin(b = 8)
         ),
-        plot.caption    = ggplot2::element_text(
+        plot.caption = ggplot2::element_text(
           colour = subtitle_colour, size = 8, hjust = 1,
           margin = ggplot2::margin(t = 10)
         ),
-        plot.margin     = ggplot2::margin(12, 12, 8, 12)
+        plot.margin = ggplot2::margin(12, 12, 8, 12)
       )
     )
 }

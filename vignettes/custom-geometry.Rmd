@@ -62,8 +62,7 @@ plot_ntl_trend(
 plot_ntl_map(
   rasters[["2022"]],
   polygons = states,
-  title    = "India nighttime lights, 2022",
-  dark     = TRUE
+  title    = "India nighttime lights, 2022"
 )
 ```
 
