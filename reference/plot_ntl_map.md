@@ -11,7 +11,7 @@ plot_ntl_map(
   title = "Nighttime lights",
   caption = NULL,
   palette = c("glow", "bhuvan"),
-  dark = FALSE,
+  dark = TRUE,
   limits = NULL
 )
 ```
@@ -46,7 +46,7 @@ plot_ntl_map(
 
   Logical. If `TRUE`, the plot background is `#080c14` (deep navy) and
   text is light. Ignored when `palette = "bhuvan"` (always dark bg).
-  Default `FALSE`.
+  Default `TRUE`.
 
 - limits:
 

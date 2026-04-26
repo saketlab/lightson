@@ -162,12 +162,19 @@ div.sourceCode pre > code {
   background: transparent !important;
 }
 
-/* Token colours */
+/* Pandoc/knitr token classes — all must be explicit since Bootstrap
+   overrides color on unclassed spans inside .sourceCode */
 .sourceCode .co { color: oklch(52% 0.01 240) !important; }
-.sourceCode .kw { color: oklch(72% 0.18 62) !important; }
+.sourceCode .kw { color: oklch(72% 0.18 62)  !important; }
 .sourceCode .st { color: oklch(76% 0.15 150) !important; }
 .sourceCode .fu { color: oklch(74% 0.14 220) !important; }
-.sourceCode .dv { color: oklch(72% 0.12 30) !important; }
+.sourceCode .dv,
+.sourceCode .fl,
+.sourceCode .cn { color: oklch(72% 0.12 30)  !important; }
+.sourceCode .va,
+.sourceCode .op,
+.sourceCode .ot,
+.sourceCode .sc { color: var(--code-fg)       !important; }
 
 p code, li code, td code, h1 code, h2 code, h3 code, dt code {
   font-size: 0.85em;

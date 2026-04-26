@@ -51,9 +51,9 @@ rasters[["2022"]]
 #> extent      : 68.1776, 97.4129, 6.7528, 37.0881  (xmin, xmax, ymin, ymax)
 #> coord. ref. : lon/lat WGS 84 (EPSG:4326) 
 #> source      : bhuvan_349e9f004c78_2022.tif 
-#> name        : file1259562db1812_1 
-#> min value   :             10.0000 
-#> max value   :            245.9732
+#> name        : file443945280941_1 
+#> min value   :            10.0000 
+#> max value   :           245.9732
 ```
 
 Bhuvan WMS returns RGB visualisation tiles, not physical radiance.
@@ -95,8 +95,7 @@ plot_ntl_trend(
 plot_ntl_map(
   rasters[["2022"]],
   polygons = states,
-  title    = "India nighttime lights, 2022",
-  dark     = TRUE
+  title    = "India nighttime lights, 2022"
 )
 #> Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
 #> ℹ Consider using `geom_tile()` instead.
@@ -153,9 +152,9 @@ head(panel_dist)
 ``` r
 
 plot_ntl_trend(panel_dist, region = c("Mumbai", "Delhi", "Chennai", "Bengaluru"))
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> Warning: Removed 8 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
+#> Warning: Removed 8 rows containing missing values or values outside the scale range
 #> (`geom_point()`).
 ```
 
@@ -164,6 +163,10 @@ plot_ntl_trend(panel_dist, region = c("Mumbai", "Delhi", "Chennai", "Bengaluru")
 ``` r
 
 plot_ntl_map(rasters_dist[["2022"]], polygons = districts)
+#> Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
 ```
 
 ![](custom-geometry_files/figure-html/plot-map-1.png)
@@ -176,12 +179,12 @@ lgd <- sf::read_sf(file.path(BHARATVIZ, "India_LGD_districts.geojson"))
 panel_lgd <- extract_panel(rasters_dist, lgd, id_col = "district_name")
 head(panel_lgd)
 #>               region_id year mean_radiance n_pixels
-#> 1    24 Paraganas North 2018     102.20219      386
-#> 780  24 Paraganas North 2019      98.66135      371
-#> 1559 24 Paraganas North 2020      97.61908      348
-#> 2338 24 Paraganas North 2021      98.94854      373
-#> 3117 24 Paraganas North 2022     101.61040      388
-#> 3896 24 Paraganas North 2023     103.19363      394
+#> 1    24 Paraganas North 2018     101.40637      384
+#> 780  24 Paraganas North 2019      97.81399      369
+#> 1559 24 Paraganas North 2020      96.70937      346
+#> 2338 24 Paraganas North 2021      98.10729      371
+#> 3117 24 Paraganas North 2022     100.81564      386
+#> 3896 24 Paraganas North 2023     102.41911      392
 ```
 
 ### Historical census boundaries

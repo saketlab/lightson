@@ -170,9 +170,9 @@ geometry:</p>
 <span><span class="co">#&gt; extent      : 68.1776, 97.4129, 6.7528, 37.0881  (xmin, xmax, ymin, ymax)</span></span>
 <span><span class="co">#&gt; coord. ref. : lon/lat WGS 84 (EPSG:4326) </span></span>
 <span><span class="co">#&gt; source      : bhuvan_349e9f004c78_2022.tif </span></span>
-<span><span class="co">#&gt; name        : file1259562db1812_1 </span></span>
-<span><span class="co">#&gt; min value   :             10.0000 </span></span>
-<span><span class="co">#&gt; max value   :            245.9732</span></span></code></pre></div>
+<span><span class="co">#&gt; name        : file443945280941_1 </span></span>
+<span><span class="co">#&gt; min value   :            10.0000 </span></span>
+<span><span class="co">#&gt; max value   :           245.9732</span></span></code></pre></div>
 <p>Bhuvan WMS returns RGB visualisation tiles, not physical radiance.
 <code><a href="../reference/bhuvan_raster.html">bhuvan_raster()</a></code> converts to single-band luminance via
 <code>lum = 0.2126*R + 0.7152*G + 0.0722*B</code> (ITU-R BT.709). Values
@@ -203,8 +203,7 @@ nW/cm^2/sr.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ntl_map.html">plot_ntl_map</a></span><span class="op">(</span></span>
 <span>  <span class="va">rasters</span><span class="op">[[</span><span class="st">"2022"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>  polygons <span class="op">=</span> <span class="va">states</span>,</span>
-<span>  title    <span class="op">=</span> <span class="st">"India nighttime lights, 2022"</span>,</span>
-<span>  dark     <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  title    <span class="op">=</span> <span class="st">"India nighttime lights, 2022"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Consider using `geom_tile()` instead.</span></span>
@@ -250,13 +249,17 @@ nW/cm^2/sr.</p>
 <span><span class="co">#&gt; 3276  Adilabad 2023      79.89459     1291</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ntl_trend.html">plot_ntl_trend</a></span><span class="op">(</span><span class="va">panel_dist</span>, region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Mumbai"</span>, <span class="st">"Delhi"</span>, <span class="st">"Chennai"</span>, <span class="st">"Bengaluru"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 8 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 8 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_point()`).</span></span></code></pre></div>
 <p><img src="custom-geometry_files/figure-html/plot-trend-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ntl_map.html">plot_ntl_map</a></span><span class="op">(</span><span class="va">rasters_dist</span><span class="op">[[</span><span class="st">"2022"</span><span class="op">]</span><span class="op">]</span>, polygons <span class="op">=</span> <span class="va">districts</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_ntl_map.html">plot_ntl_map</a></span><span class="op">(</span><span class="va">rasters_dist</span><span class="op">[[</span><span class="st">"2022"</span><span class="op">]</span><span class="op">]</span>, polygons <span class="op">=</span> <span class="va">districts</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Consider using `geom_tile()` instead.</span></span>
+<span><span class="co">#&gt; Raster pixels are placed at uneven horizontal intervals and will be shifted</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Consider using `geom_tile()` instead.</span></span></code></pre></div>
 <p><img src="custom-geometry_files/figure-html/plot-map-1.png" class="r-plt" alt="" width="672"></p>
 <div class="section level3">
 <h3 id="lgd-boundaries">LGD boundaries<a class="anchor" aria-label="anchor" href="#lgd-boundaries"></a>
@@ -266,12 +269,12 @@ nW/cm^2/sr.</p>
 <span><span class="va">panel_lgd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_panel.html">extract_panel</a></span><span class="op">(</span><span class="va">rasters_dist</span>, <span class="va">lgd</span>, id_col <span class="op">=</span> <span class="st">"district_name"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">panel_lgd</span><span class="op">)</span></span>
 <span><span class="co">#&gt;               region_id year mean_radiance n_pixels</span></span>
-<span><span class="co">#&gt; 1    24 Paraganas North 2018     102.20219      386</span></span>
-<span><span class="co">#&gt; 780  24 Paraganas North 2019      98.66135      371</span></span>
-<span><span class="co">#&gt; 1559 24 Paraganas North 2020      97.61908      348</span></span>
-<span><span class="co">#&gt; 2338 24 Paraganas North 2021      98.94854      373</span></span>
-<span><span class="co">#&gt; 3117 24 Paraganas North 2022     101.61040      388</span></span>
-<span><span class="co">#&gt; 3896 24 Paraganas North 2023     103.19363      394</span></span></code></pre></div>
+<span><span class="co">#&gt; 1    24 Paraganas North 2018     101.40637      384</span></span>
+<span><span class="co">#&gt; 780  24 Paraganas North 2019      97.81399      369</span></span>
+<span><span class="co">#&gt; 1559 24 Paraganas North 2020      96.70937      346</span></span>
+<span><span class="co">#&gt; 2338 24 Paraganas North 2021      98.10729      371</span></span>
+<span><span class="co">#&gt; 3117 24 Paraganas North 2022     100.81564      386</span></span>
+<span><span class="co">#&gt; 3896 24 Paraganas North 2023     102.41911      392</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="historical-census-boundaries">Historical census boundaries<a class="anchor" aria-label="anchor" href="#historical-census-boundaries"></a>

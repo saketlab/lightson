@@ -87,11 +87,6 @@ plot_ntl_trend(
 
 ``` r
 
-library(sf)
-#> Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE
-library(terra)
-#> terra 1.9.11
-
 states_sf <- get_india_admin("state")
 
 years_sel <- c(2012, 2015, 2018, 2021, 2024)
@@ -112,54 +107,27 @@ if (length(rasters) == 0) stop("No rasters downloaded. Check network / Bhuvan WM
 
 ``` r
 
-library(patchwork)
-#> 
-#> Attaching package: 'patchwork'
-#> The following object is masked from 'package:terra':
-#> 
-#>     area
-
-all_vals <- unlist(lapply(rasters, function(r) terra::values(r)), use.names = FALSE)
-lim <- c(0, quantile(all_vals, 0.995, na.rm = TRUE))
-
-panels <- lapply(names(rasters), function(yr) {
-  plot_ntl_map(
-    rasters[[yr]],
-    polygons = states_sf,
-    title    = yr,
-    dark     = TRUE,
-    limits   = lim
-  ) +
-    theme(
-      legend.position = "none",
-      plot.title = element_text(
-        colour = "#E8A87C", face = "bold", size = 12,
-        hjust = 0.5, margin = margin(b = 4)
-      )
-    )
-})
-
-wrap_plots(panels, nrow = 2) +
-  plot_layout(guides = "collect") &
-  plot_annotation(
-    title = "India at night, 2012 to 2024",
-    subtitle = "Bhuvan NTL luminance (ITU-R BT.709). Boundaries: LGD/SoI.",
-    caption = "Source: ISRO Bhuvan NTL portal",
-    theme = theme(
-      plot.background = element_rect(fill = "#080c14", colour = NA),
-      plot.title = element_text(
-        colour = "#CDD9E5", face = "bold", size = 15,
-        margin = margin(b = 4)
-      ),
-      plot.subtitle = element_text(colour = "#8B949E", size = 9, margin = margin(b = 8)),
-      plot.caption = element_text(
-        colour = "#8B949E", size = 8, hjust = 1,
-        margin = margin(t = 10)
-      ),
-      plot.margin = margin(12, 12, 8, 12)
-    )
-  )
+plot_ntl_panel(
+  rasters,
+  polygons = states_sf,
+  title    = "India at night, 2012 to 2024",
+  subtitle = "Bhuvan NTL luminance (ITU-R BT.709). Boundaries: LGD/SoI.",
+  caption  = "Source: ISRO Bhuvan NTL portal",
+  ncol     = 3L
+)
 #> Warning: Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
+#> ℹ Consider using `geom_tile()` instead.
+#> Raster pixels are placed at uneven horizontal intervals and will be shifted
 #> ℹ Consider using `geom_tile()` instead.
 #> Raster pixels are placed at uneven horizontal intervals and will be shifted
 #> ℹ Consider using `geom_tile()` instead.

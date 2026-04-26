@@ -4,8 +4,6 @@ Arranges one map per year into a patchwork grid with a shared title,
 subtitle, and caption. A shared luminance scale is computed from the
 99.5th percentile across all rasters so panels are directly comparable.
 
-Requires the patchwork package.
-
 ## Usage
 
 ``` r
@@ -80,6 +78,10 @@ plot_ntl_panel(
 ## Value
 
 A `patchwork` object.
+
+## Details
+
+Requires the patchwork package.
 
 ## Examples
 
