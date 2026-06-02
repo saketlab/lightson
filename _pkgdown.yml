@@ -1,4 +1,4 @@
-url: https://saketkc.github.io/lightson/
+url: https://lightson.saketlab.org
 
 development:
   mode: auto
@@ -34,9 +34,9 @@ template:
       <meta name="author" content="Saket Choudhary">
       <meta name="robots" content="index, follow">
       <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-      <link rel="canonical" href="https://saketkc.github.io/lightson/">
+      <link rel="canonical" href="https://lightson.saketlab.org/">
       <meta property="og:type" content="website">
-      <meta property="og:url" content="https://saketkc.github.io/lightson/">
+      <meta property="og:url" content="https://lightson.saketlab.org/">
       <meta property="og:title" content="lightson — Nighttime Lights Data for R">
       <meta property="og:description" content="R package for downloading and analysing nighttime lights satellite data from NASA VIIRS and India's Bhuvan NTL portal. Tidy panel output ready for econometrics.">
       <meta property="og:site_name" content="lightson">
@@ -62,8 +62,8 @@ template:
           "name": "Saket Choudhary",
           "url": "https://saketlab.org"
         },
-        "url": "https://saketkc.github.io/lightson/",
-        "downloadUrl": "https://github.com/saketkc/lightson",
+        "url": "https://lightson.saketlab.org/",
+        "downloadUrl": "https://github.com/saketlab/lightson",
         "softwareVersion": "0.1.0",
         "programmingLanguage": "R"
       }
@@ -78,9 +78,9 @@ home:
 
   links:
   - text: Browse source code
-    href: https://github.com/saketkc/lightson
+    href: https://github.com/saketlab/lightson
   - text: Report a bug
-    href: https://github.com/saketkc/lightson/issues
+    href: https://github.com/saketlab/lightson/issues
 
 navbar:
   structure:
@@ -104,7 +104,7 @@ navbar:
 
     github:
       icon: fab fa-github fa-lg
-      href: https://github.com/saketkc/lightson
+      href: https://github.com/saketlab/lightson
       aria-label: GitHub
 
 reference:
@@ -141,7 +141,7 @@ reference:
 
 authors:
   Saket Choudhary:
-    href: https://github.com/saketkc
+    href: https://github.com/saketlab
 
 footer:
   structure:

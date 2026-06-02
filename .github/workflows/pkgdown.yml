@@ -1,0 +1,25 @@
+# Generic pkgdown deploy workflow — works for most packages
+# Copy to: .github/workflows/pkgdown.yml in each repo
+#
+# Packages that need this (no extra setup):
+#   censusindia, crsindia, srsindia, mccdindia, nfhs4, nfhs5,
+#   healthsurveyindia, consumptionsurveyindia, lasi, indiahealthstack
+
+name: pkgdown
+
+on:
+  push:
+    branches: [main, master]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pkgdown:
+    uses: saketlab/.github/.github/workflows/deploy-pkgdown.yml@main
+    with:
+      package-name: ${{ github.event.repository.name }}
+    secrets: inherit
