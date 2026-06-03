@@ -13,7 +13,7 @@ The ISRO Bhuvan NTL source does not require any authentication. VIIRS requires a
 ## Installation
 
 ```r
-pak::pak("saketkc/lightson")
+pak::pak("saketlab/lightson")
 ```
 
 ## Usage
