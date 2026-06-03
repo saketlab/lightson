@@ -1,25 +1,74 @@
-# Generic pkgdown deploy workflow — works for most packages
-# Copy to: .github/workflows/pkgdown.yml in each repo
-#
-# Packages that need this (no extra setup):
-#   censusindia, crsindia, srsindia, mccdindia, nfhs4, nfhs5,
-#   healthsurveyindia, consumptionsurveyindia, lasi, indiahealthstack
-
-name: pkgdown
-
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   release:
     types: [published]
   workflow_dispatch:
+
+name: pkgdown
 
 permissions:
   contents: read
 
 jobs:
   pkgdown:
-    uses: saketlab/.github/.github/workflows/deploy-pkgdown.yml@main
-    with:
-      package-name: ${{ github.event.repository.name }}
-    secrets: inherit
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    concurrency:
+      group: pkgdown-deploy
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PKG_NAME: ${{ github.event.repository.name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+
+      - name: Build pkgdown site
+        run: pkgdown::build_site(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+
+      - name: Prepare deploy directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT || 22 }}
+          script: |
+            mkdir -p /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs.new
+
+      - name: Upload site
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT || 22 }}
+          source: "docs/*"
+          target: "/var/www/r-pkgdown/${{ env.PKG_NAME }}/docs.new/"
+          strip_components: 1
+          overwrite: true
+
+      - name: Swap live site
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT || 22 }}
+          script: |
+            rm -rf /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs.old
+            mv /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs.old 2>/dev/null || true
+            mv /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs.new /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs
+            rm -rf /var/www/r-pkgdown/${{ env.PKG_NAME }}/docs.old
+            echo "Deployed ${{ env.PKG_NAME }} to https://${{ env.PKG_NAME }}.saketlab.org"
