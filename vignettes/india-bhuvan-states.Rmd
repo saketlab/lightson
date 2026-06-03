@@ -1,5 +1,8 @@
 ---
 title: "India state-level NTL with Bhuvan"
+description: >
+  Pull pre-aggregated state-level radiance from the Bhuvan NTL REST API
+  and plot trends across Indian states.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{India state-level NTL with Bhuvan}

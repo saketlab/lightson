@@ -1,5 +1,8 @@
 ---
 title: "India electrification trends with VIIRS"
+description: >
+  Download VIIRS/Black Marble annual composites, extract panel statistics
+  by state, and plot electrification trends over time.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{India electrification trends with VIIRS}

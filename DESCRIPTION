@@ -5,7 +5,7 @@ Authors@R:
     person("Saket", "Choudhary",
            email = "saketkc@gmail.com",
            role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-7866-5932"))
+           comment = c(ORCID = "0000-0001-5202-7633"))
 Description: Unified interface for downloading and processing nighttime lights
     (NTL) satellite data from multiple sources: NASA VIIRS/Black Marble
     (VNP46A4 annual composites) and India's ISRO Bhuvan NTL portal. Provides

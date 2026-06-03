@@ -1,5 +1,8 @@
 ---
 title: "Custom geometry: district-level NTL with custom boundaries"
+description: >
+  Extract zonal NTL statistics over custom sf polygons (districts,
+  constituencies, or any user-supplied geometry).
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Custom geometry: district-level NTL with custom boundaries}
