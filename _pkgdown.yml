@@ -16,11 +16,11 @@ template:
     border-radius: "6px"
     font-size-base: "1rem"
     headings-font-weight: "700"
+    base_font: {google: "Albert Sans"}
+    heading_font: {google: "Albert Sans"}
+    code_font: {google: "JetBrains Mono"}
   includes:
     in_header: |
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..500&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
       <script>
         (function(){
           var stored = localStorage.getItem('bs-color-scheme');
