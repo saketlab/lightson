@@ -234,7 +234,7 @@ plot_ntl_map <- function(raster,
     ggplot2::geom_sf(
       data = bg_poly, fill = bg_col, colour = NA, inherit.aes = FALSE
     ) +
-    ggplot2::geom_raster(
+    ggplot2::geom_tile(
       data = df,
       ggplot2::aes(x = x, y = y, fill = .data[[val_col]])
     )
