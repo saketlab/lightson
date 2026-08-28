@@ -30,6 +30,11 @@ template:
           document.documentElement.setAttribute('data-bs-theme', stored);
         })();
       </script>
+      <style>
+        /* lightson figures are already dark/light-theme aware; skip pkgdown's
+           auto-invert (data-bs-theme=dark img.r-plt filter) */
+        img.r-plt { filter: none !important; }
+      </style>
       <meta name="description" content="Download VIIRS and Bhuvan nighttime lights rasters in R, extract zonal statistics over any sf geometry, and get tidy panel output for econometrics.">
       <meta name="keywords" content="nighttime lights, NTL, VIIRS, Black Marble, VNP46A4, Bhuvan, ISRO, R package, zonal statistics, radiance, remote sensing, panel data, electrification, India">
       <meta name="author" content="Saket Choudhary">
