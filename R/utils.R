@@ -1,3 +1,6 @@
+# NSE columns from ggplot2::aes() calls in R/plot.R
+utils::globalVariables(c("x", "y", "year", "mean_radiance", ".data"))
+
 BHUVAN_NTL_BASE <- "https://bhuvan-app1.nrsc.gov.in/bhuvanNTL/"
 BHUVAN_WMS_BASE <- "https://bhuvan-app1.nrsc.gov.in/vec3wms/wms"
 BHUVAN_WMS_LAYER <- "ntl:BhuvanNTL"
@@ -21,7 +24,7 @@ BHUVAN_WMS_LAYER <- "ntl:BhuvanNTL"
 }
 
 .cache_dir <- function() {
-  d <- file.path(Sys.getenv("HOME"), ".lightson", "cache")
+  d <- tools::R_user_dir("lightson", "cache")
   dir.create(d, recursive = TRUE, showWarnings = FALSE)
   d
 }
@@ -61,7 +64,7 @@ cache_clear <- function(source = NULL) {
       "2012-2023 uses VNP46A4 Collection 1.0 and 2024 onwards uses ",
       "Collection 2.0. Radiance estimates are not directly comparable ",
       "across this boundary. Treat any 2023-to-2024 trend as an ",
-      "artefact of the collection change, not a real-world signal.",
+      "artefact of the collection change.",
       call. = FALSE
     )
   } else if (has_new) {

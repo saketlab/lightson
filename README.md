@@ -89,7 +89,7 @@ VIIRS gives physical radiance in nW/cm^2/sr, which is useful when you need calib
 ```r
 # read EARTHDATA_TOKEN from environment
 token <- earthdata_token()   
-rasters <- ntl_download("viirs", region = "IND", years = 2020:2023, token = token)
+rasters <- ntl_download(region = "IND", years = 2020:2023, token = token)
 panel <- extract_panel(rasters, get_india_admin("state"), id_col = "state_name")
 plot_ntl_trend(panel, region = c("Bihar", "Maharashtra"))
 ```

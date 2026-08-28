@@ -83,10 +83,9 @@ plot_ntl_panel(
 )
 ```
 
-Each panel uses the same luminance scale anchored at zero, so brightness is
-comparable across years. The sharpest gains are in Bihar, UP, and
-Odisha after 2015, broadly tracking the [Saubhagya electrification scheme](https://powermin.gov.in/en/content/saubhagya)
-(2017-2019).
+All panels are drawn at the same luminance scale (reference zero). The
+sharpest gains are in Bihar, UP, and Odisha after 2015, broadly tracking the
+Saubhagya electrification scheme (2017-2019).
 
 ## Filter by year range
 

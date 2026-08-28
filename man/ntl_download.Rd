@@ -4,11 +4,9 @@
 \alias{ntl_download}
 \title{Download VIIRS Black Marble annual nighttime lights}
 \usage{
-ntl_download(source = "viirs", region, years, token, force = FALSE)
+ntl_download(region, years, token, force = FALSE)
 }
 \arguments{
-\item{source}{Character. Currently only \code{"viirs"} is supported.}
-
 \item{region}{An \code{sf} object, \code{SpatVector}, or ISO 3166-1 alpha-3 country
 code (e.g., \code{"IND"}).}
 
@@ -31,7 +29,7 @@ Requires a NASA Earthdata bearer token, see \code{\link[=earthdata_token]{earthd
 \examples{
 \dontrun{
 token <- earthdata_token()
-rasters <- ntl_download("viirs", region = "IND", years = 2020:2023, token = token)
+rasters <- ntl_download(region = "IND", years = 2020:2023, token = token)
 panel <- extract_panel(rasters, get_india_admin("district"))
 }
 }

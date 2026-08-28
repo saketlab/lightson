@@ -41,8 +41,8 @@ names(rasters)
 rasters[["2022"]]
 ```
 
-Bhuvan WMS returns RGB visualisation tiles, not physical radiance.
-`bhuvan_raster()` converts to single-band luminance via
+Bhuvan WMS returns RGB visualisation tiles. `bhuvan_raster()` converts
+these to single-band luminance via
 `lum = 0.2126*R + 0.7152*G + 0.0722*B` (ITU-R BT.709). Values are
 comparable across years for trend analysis but are not in nW/cm^2/sr.
 
@@ -80,7 +80,7 @@ districts <- tryCatch(
   error = function(e) NULL
 )
 if (is.null(districts)) {
-  message("bharatviz not reachable -- skipping district examples")
+  message("bharatviz not reachable, skipping district examples")
   knitr::opts_chunk$set(eval = FALSE)
 }
 nrow(districts)
@@ -131,7 +131,7 @@ To use NASA VIIRS rasters, supply an [Earthdata token](https://urs.earthdata.nas
 
 ```{r viirs}
 token <- earthdata_token()
-rasters_viirs <- ntl_download("viirs", region = districts, years = 2018:2023, token = token)
+rasters_viirs <- ntl_download(region = districts, years = 2018:2023, token = token)
 if (length(rasters_viirs) > 0) {
   panel_viirs <- extract_panel(rasters_viirs, districts, id_col = "district_name")
   head(panel_viirs)

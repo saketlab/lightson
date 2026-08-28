@@ -3,17 +3,12 @@ Title: Download and Analyse Nighttime Lights Satellite Data
 Version: 0.1.0
 Authors@R:
     person("Saket", "Choudhary",
-           email = "saketkc@gmail.com",
+           email = "saketc@iitb.ac.in",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5202-7633"))
-Description: Unified interface for downloading and processing nighttime lights
-    (NTL) satellite data from multiple sources: NASA VIIRS/Black Marble
-    (VNP46A4 annual composites) and India's ISRO Bhuvan NTL portal. Provides
-    bhuvan_stats() for instant pre-aggregated state-level radiance from the
-    Bhuvan REST API, bhuvan_raster() for WMS GeoTIFF tiles compatible with
-    any custom sf geometry, extract_panel() for tidy long-format zonal
-    statistics ready for econometric panel regression, and convenience
-    functions for Indian administrative boundaries.
+Description: Downloads and processes nighttime lights (NTL) satellite data
+    from NASA VIIRS/Black Marble (VNP46A4 annual composites) and India's 
+    ISRO Bhuvan NTL portal.
 License: MIT + file LICENSE
 Depends: R (>= 4.1.0)
 Encoding: UTF-8

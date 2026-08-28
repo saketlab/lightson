@@ -38,8 +38,8 @@ for a given spatial extent and converts the RGB visualization output to a
 single-band luminance raster.
 }
 \details{
-The Bhuvan WMS returns RGB visualization rasters, not physical radiance.
-Luminance is computed as \code{lum = 0.2126*R + 0.7152*G + 0.0722*B}
+The Bhuvan WMS returns RGB visualization rasters. Luminance is computed
+as \code{lum = 0.2126*R + 0.7152*G + 0.0722*B}
 (ITU-R BT.709). Values are comparable across years for trend analysis but
 differ in units from VIIRS nW/cm²/sr. Do not mix Bhuvan luminance and VIIRS
 radiance in the same regression without normalising first.

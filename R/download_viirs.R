@@ -1,3 +1,6 @@
+LAADS_BASE <- "https://ladsweb.modaps.eosdis.nasa.gov"
+LAADS_ARCHIVE <- "/archive/allData/5200/VNP46A4"
+
 #' Download VIIRS Black Marble annual nighttime lights
 #'
 #' Downloads NASA VIIRS/Black Marble VNP46A4 annual composite rasters from
@@ -5,7 +8,6 @@
 #'
 #' Requires a NASA Earthdata bearer token, see [earthdata_token()].
 #'
-#' @param source Character. Currently only `"viirs"` is supported.
 #' @param region An `sf` object, `SpatVector`, or ISO 3166-1 alpha-3 country
 #'   code (e.g., `"IND"`).
 #' @param years Integer vector of years to download.
@@ -16,18 +18,11 @@
 #' @examples
 #' \dontrun{
 #' token <- earthdata_token()
-#' rasters <- ntl_download("viirs", region = "IND", years = 2020:2023, token = token)
+#' rasters <- ntl_download(region = "IND", years = 2020:2023, token = token)
 #' panel <- extract_panel(rasters, get_india_admin("district"))
 #' }
-ntl_download <- function(source = "viirs", region, years, token, force = FALSE) {
-  source <- match.arg(source, choices = "viirs")
-  .ntl_download_viirs(region = region, years = as.integer(years), token = token, force = force)
-}
-
-LAADS_BASE <- "https://ladsweb.modaps.eosdis.nasa.gov"
-LAADS_ARCHIVE <- "/archive/allData/5200/VNP46A4"
-
-.ntl_download_viirs <- function(region, years, token, force) {
+ntl_download <- function(region, years, token, force = FALSE) {
+  years <- as.integer(years)
   bbox <- .region_to_bbox(region)
   bbox_hash <- .short_hash(paste(bbox, collapse = "_"))
   tiles <- .bbox_to_viirs_tiles(bbox)

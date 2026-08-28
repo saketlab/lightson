@@ -9,35 +9,49 @@
   "#999999"
 )
 
+.ntl_font <- "sans"
+
 
 #' ggplot2 theme for nighttime lights plots
 #'
-#' A clean `theme_minimal()` base tuned for NTL data: tight grid, bold title,
-#' and optional overrides via `...`.
+#' A transparent-background `theme_minimal()` base tuned for NTL data: tight
+#' grid, bold title, and optional overrides via `...`. Ink colour is a
+#' single equal-contrast grey (`#767676`, ~4.5:1 against both pure black and
+#' pure white) so the same rendered figure reads on light and dark pages
+#' alike, since pkgdown bakes each figure to one static PNG at build time.
 #'
 #' @param base_size Base font size. Default `12`.
 #' @param ... Additional [ggplot2::theme()] arguments.
 #' @return A ggplot2 theme object.
 #' @export
 theme_ntl <- function(base_size = 12, ...) {
-  ggplot2::theme_minimal(base_size = base_size) +
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Install the 'ggplot2' package to use theme_ntl().", call. = FALSE)
+  }
+  ink <- "#767676"
+  grid_col <- "#76767650"
+  ggplot2::theme_minimal(base_size = base_size, base_family = .ntl_font) +
     ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.1),
+      plot.background = ggplot2::element_rect(fill = "transparent", colour = NA),
+      panel.background = ggplot2::element_rect(fill = "transparent", colour = NA),
+      legend.background = ggplot2::element_rect(fill = "transparent", colour = NA),
+      legend.key = ggplot2::element_rect(fill = "transparent", colour = NA),
+      plot.title = ggplot2::element_text(colour = ink, face = "bold", size = base_size * 1.1),
       plot.title.position = "plot",
       plot.subtitle = ggplot2::element_text(
-        colour = "grey50", size = base_size * 0.9, margin = ggplot2::margin(b = 8)
+        colour = ink, size = base_size * 0.9, margin = ggplot2::margin(b = 8)
       ),
       plot.caption = ggplot2::element_text(
-        colour = "grey60", size = base_size * 0.75, hjust = 1,
+        colour = ink, size = base_size * 0.75, hjust = 1,
         margin = ggplot2::margin(t = 8)
       ),
-      axis.title = ggplot2::element_text(size = base_size * 0.9),
-      axis.text = ggplot2::element_text(size = base_size * 0.85),
-      legend.title = ggplot2::element_text(size = base_size * 0.85, face = "bold"),
-      legend.text = ggplot2::element_text(size = base_size * 0.85),
+      axis.title = ggplot2::element_text(colour = ink, size = base_size * 0.9),
+      axis.text = ggplot2::element_text(colour = ink, size = base_size * 0.85),
+      legend.title = ggplot2::element_text(colour = ink, size = base_size * 0.85, face = "bold"),
+      legend.text = ggplot2::element_text(colour = ink, size = base_size * 0.85),
       legend.key.size = ggplot2::unit(0.9, "lines"),
       panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_line(colour = "grey92", linewidth = 0.4),
+      panel.grid.major = ggplot2::element_line(colour = grid_col, linewidth = 0.4),
       plot.margin = ggplot2::margin(8, 12, 8, 8),
       ...
     )
@@ -230,7 +244,7 @@ plot_ntl_map <- function(raster,
       ggplot2::scale_fill_manual(
         values = stats::setNames(.ntl_bhuvan_colours, .ntl_bhuvan_labels),
         na.value = "#9b6fc8",
-        name = "NTL Radiance\n(nW/cm²/sr)",
+        name = "NTL Radiance\n(nW/cm\u00B2/sr)",
         drop = FALSE,
         guide = ggplot2::guide_legend(
           override.aes   = list(size = 4),
@@ -259,9 +273,9 @@ plot_ntl_map <- function(raster,
   p <- p +
     ggplot2::coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +
     ggplot2::labs(x = NULL, y = NULL, title = title, caption = caption) +
-    ggplot2::theme_void(base_size = 12) +
+    ggplot2::theme_void(base_size = 12, base_family = .ntl_font) +
     ggplot2::theme(
-      plot.background = ggplot2::element_rect(fill = bg_col, colour = NA),
+      plot.background = ggplot2::element_rect(fill = "transparent", colour = NA),
       panel.background = ggplot2::element_rect(fill = bg_col, colour = NA),
       panel.border = ggplot2::element_blank(),
       panel.ontop = FALSE,
@@ -374,6 +388,7 @@ plot_ntl_panel <- function(rasters,
       subtitle = subtitle,
       caption = caption,
       theme = ggplot2::theme(
+        text = ggplot2::element_text(family = .ntl_font),
         plot.background = ggplot2::element_rect(fill = bg_colour, colour = NA),
         plot.title = ggplot2::element_text(
           colour = title_colour, face = "bold", size = 15,

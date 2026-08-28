@@ -15,6 +15,9 @@ theme_ntl(base_size = 12, ...)
 A ggplot2 theme object.
 }
 \description{
-A clean \code{theme_minimal()} base tuned for NTL data: tight grid, bold title,
-and optional overrides via \code{...}.
+A transparent-background \code{theme_minimal()} base tuned for NTL data: tight
+grid, bold title, and optional overrides via \code{...}. Ink colour is a
+single equal-contrast grey (\verb{#767676}, ~4.5:1 against both pure black and
+pure white) so the same rendered figure reads on light and dark pages
+alike, since pkgdown bakes each figure to one static PNG at build time.
 }

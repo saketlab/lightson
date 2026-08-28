@@ -5,7 +5,7 @@
 #' layer, and returns a tidy long-format data frame with one row per
 #' region per year.
 #'
-#' The `polygons` argument accepts any `sf` object -- GADM, bharatviz GeoJSONs,
+#' The `polygons` argument accepts any `sf` object: GADM, bharatviz GeoJSONs,
 #' LGD districts, or any shapefile loaded with `sf::read_sf()`.
 #'
 #' @param rasters A named list of `SpatRaster` objects. Names should be years

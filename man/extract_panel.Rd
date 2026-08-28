@@ -36,7 +36,7 @@ layer, and returns a tidy long-format data frame with one row per
 region per year.
 }
 \details{
-The \code{polygons} argument accepts any \code{sf} object -- GADM, bharatviz GeoJSONs,
+The \code{polygons} argument accepts any \code{sf} object: GADM, bharatviz GeoJSONs,
 LGD districts, or any shapefile loaded with \code{sf::read_sf()}.
 }
 \examples{

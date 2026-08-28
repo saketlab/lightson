@@ -2,3 +2,9 @@
 ^\.Rproj\.user$
 ^\.positai$
 ^\.claude$
+^\.github$
+^docs$
+^pkgdown$
+^_pkgdown\.yml$
+^GOALS\.md$
+^LICENSE\.md$

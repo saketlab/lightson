@@ -29,7 +29,7 @@ State boundaries use a bundled LGD (Local Government Directory) dataset
 derived from the Survey of India.
 
 For custom boundaries, load your own file with \code{sf::read_sf()} and pass it
-directly to \code{\link[=extract_panel]{extract_panel()}} -- no wrapper needed.
+directly to \code{\link[=extract_panel]{extract_panel()}}.
 }
 \examples{
 \dontrun{

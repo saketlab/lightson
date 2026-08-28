@@ -7,7 +7,7 @@
 #' derived from the Survey of India.
 #'
 #' For custom boundaries, load your own file with `sf::read_sf()` and pass it
-#' directly to [extract_panel()] -- no wrapper needed.
+#' directly to [extract_panel()].
 #'
 #' @param level One of `"country"`, `"state"`, or `"district"`.
 #' @param source One of `"gadm"` (default) or `"bhuvan"`. For `level = "state"`,
