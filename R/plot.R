@@ -9,7 +9,7 @@
   "#999999"
 )
 
-.ntl_font <- "sans"
+.ntl_font <- Sys.getenv("LIGHTSON_FONT", "sans")
 
 
 #' ggplot2 theme for nighttime lights plots
