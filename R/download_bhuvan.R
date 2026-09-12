@@ -75,13 +75,14 @@ bhuvan_stats <- function(years = NULL, state = NULL) {
 #'   `bbox_pad = c(0, 0, 0, 3.5)` extends the north edge by 3.5 degrees to
 #'   include all of Jammu and Kashmir).
 #' @return A named list of single-band `SpatRaster` objects, keyed by year
+#'   (e.g., `list("2020" = rast(...), "2021" = rast(...))`). Errors if the WMS
+#'   fetch fails for any requested year.
 #' @section Collection break:
 #'   Bhuvan NTL data from 2024 onwards is derived from VNP46A4 **Collection
 #'   2.0**, while 2012-2023 uses the legacy **Collection 1.0**. The two
 #'   collections use different calibration and atmospheric correction
 #'   algorithms, so luminance values are not directly comparable across this
 #'   boundary.
-#'   (e.g., `list("2020" = rast(...), "2021" = rast(...))`).
 #' @export
 #' @examples
 #' \dontrun{
@@ -127,7 +128,15 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
   })
 
   names(result) <- as.character(years)
-  result[!vapply(result, is.null, logical(1))]
+  failed <- vapply(result, is.null, logical(1))
+  if (any(failed)) {
+    stop(
+      "Bhuvan WMS fetch failed for year(s): ",
+      paste(names(result)[failed], collapse = ", "),
+      call. = FALSE
+    )
+  }
+  result
 }
 
 .bhuvan_get <- function(endpoint, query = list()) {

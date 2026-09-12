@@ -31,6 +31,8 @@ include all of Jammu and Kashmir).}
 }
 \value{
 A named list of single-band \code{SpatRaster} objects, keyed by year
+(e.g., \code{list("2020" = rast(...), "2021" = rast(...))}). Errors if the WMS
+fetch fails for any requested year.
 }
 \description{
 Fetches annual nighttime lights GeoTIFF tiles from the Bhuvan WMS service
@@ -51,7 +53,6 @@ Bhuvan NTL data from 2024 onwards is derived from VNP46A4 \strong{Collection
 collections use different calibration and atmospheric correction
 algorithms, so luminance values are not directly comparable across this
 boundary.
-(e.g., \code{list("2020" = rast(...), "2021" = rast(...))}).
 }
 
 \examples{
