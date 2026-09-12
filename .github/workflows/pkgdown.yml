@@ -19,6 +19,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       PKG_NAME: ${{ github.event.repository.name }}
       LIGHTSON_FONT: "Liberation Sans"
+      EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
