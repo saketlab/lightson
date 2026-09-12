@@ -1,124 +1,139 @@
 LAADS_BASE <- "https://ladsweb.modaps.eosdis.nasa.gov"
-LAADS_ARCHIVE <- "/archive/allData/5200/VNP46A4"
+LAADS_ARCHIVE <- "/archive/allData/5200"
 
-#' Download VIIRS Black Marble annual nighttime lights
+#' Download NASA Black Marble nighttime lights
 #'
-#' Downloads NASA VIIRS/Black Marble VNP46A4 annual composite rasters from
-#' NASA LAADS DAAC for a given region and year range.
+#' Downloads calibrated VIIRS Black Marble annual (`VNP46A4`), monthly
+#' (`VNP46A3`), or daily (`VNP46A2`) rasters from NASA LAADS DAAC.
 #'
-#' Requires a NASA Earthdata bearer token, see [earthdata_token()].
-#'
-#' @param region An `sf` object, `SpatVector`, or ISO 3166-1 alpha-3 country
-#'   code (e.g., `"IND"`).
-#' @param years Integer vector of years to download.
-#' @param token A bearer token string from [earthdata_token()].
-#' @param force Logical. Re-download even if cached. Default `FALSE`.
-#' @return A named list of `SpatRaster` objects, keyed by year.
+#' @param region An `sf` object, `SpatVector`, or ISO 3166-1 alpha-3 code.
+#' @param years Integer years. Required for annual data; selects all twelve
+#'   months for monthly data when `dates` is omitted.
+#' @param token NASA Earthdata bearer token from [earthdata_token()].
+#' @param force Re-download cached output.
+#' @param product One of `"annual"`, `"monthly"`, or `"daily"`.
+#' @param dates Date-like vector. Required for daily data. Monthly dates are
+#'   normalised to the first day of their month.
+#' @param quality For daily data, `"high"` masks pixels whose mandatory QA
+#'   flag is nonzero; `"all"` retains every retrieval.
+#' @return Named list of cropped `SpatRaster` objects. Names are years for
+#'   annual data and ISO dates otherwise.
 #' @export
 #' @examples
 #' \dontrun{
 #' token <- earthdata_token()
-#' rasters <- ntl_download(region = "IND", years = 2020:2023, token = token)
-#' panel <- extract_panel(rasters, get_india_admin("district"))
+#' annual <- ntl_download("IND", 2020:2025, token)
+#' monthly <- ntl_download("IND", 2025, token, product = "monthly")
+#' daily <- ntl_download("IND",
+#'   token = token, product = "daily",
+#'   dates = as.Date("2025-11-12")
+#' )
 #' }
-ntl_download <- function(region, years, token, force = FALSE) {
-  years <- as.integer(years)
+ntl_download <- function(region, years = NULL, token, force = FALSE,
+                         product = c("annual", "monthly", "daily"),
+                         dates = NULL, quality = c("high", "all")) {
+  product <- match.arg(product)
+  quality <- match.arg(quality)
+  acquisitions <- .viirs_acquisitions(product, years, dates)
   bbox <- .region_to_bbox(region)
   bbox_hash <- .short_hash(paste(bbox, collapse = "_"))
   tiles <- .bbox_to_viirs_tiles(bbox)
-  tile_names <- vapply(tiles, function(t) sprintf("h%02dv%02d", t$h, t$v), character(1))
-  cache_d <- .cache_dir()
+  tile_names <- vapply(tiles, function(x) sprintf("h%02dv%02d", x$h, x$v), character(1))
+  product_id <- c(annual = "VNP46A4", monthly = "VNP46A3", daily = "VNP46A2")[[product]]
 
-  years_to_download <- years[!vapply(years, function(yr) {
-    .cache_hit(file.path(cache_d, paste0("viirs_", bbox_hash, "_", yr, ".tif")), force)
-  }, logical(1))]
-  listings <- stats::setNames(
-    lapply(unique(years_to_download), .laads_csv_listing),
-    as.character(unique(years_to_download))
-  )
-
-  result <- lapply(years, function(yr) {
-    key <- paste0("viirs_", bbox_hash, "_", yr)
-    path <- file.path(cache_d, paste0(key, ".tif"))
-
+  result <- lapply(seq_along(acquisitions), function(i) {
+    acquisition <- acquisitions[[i]]
+    label <- names(acquisitions)[i]
+    key <- paste("viirs", product, bbox_hash, label, quality, sep = "_")
+    path <- file.path(.cache_dir(), paste0(key, ".tif"))
     if (.cache_hit(path, force)) {
-      message("Using cached: ", basename(path))
-      return(terra::rast(path))
+      return(.set_ntl_metadata(terra::rast(path), product_id, product))
     }
-
-    listing <- listings[[as.character(yr)]]
+    listing <- .laads_csv_listing(product_id, acquisition)
     if (is.null(listing)) {
       return(NULL)
     }
-
-    matched <- listing[
-      vapply(listing$name, function(n) {
-        strsplit(n, ".", fixed = TRUE)[[1]][3] %in% tile_names
-      }, logical(1)),
-    ]
-
-    if (nrow(matched) == 0) {
-      message("No tiles found for year ", yr, " in region")
+    matched <- listing[vapply(listing$name, function(n) {
+      bits <- strsplit(n, ".", fixed = TRUE)[[1]]
+      length(bits) >= 3 && bits[3] %in% tile_names
+    }, logical(1)), , drop = FALSE]
+    if (!nrow(matched)) {
+      message("No ", product_id, " tiles found for ", label)
       return(NULL)
     }
-
-    message("Downloading VIIRS VNP46A4: year ", yr, " (", nrow(matched), " tile(s)) ...")
-    tile_rasters <- lapply(matched$name, function(fname) {
-      .download_viirs_tile(fname, yr, token)
-    })
-    tile_rasters <- Filter(Negate(is.null), tile_rasters)
-
-    if (length(tile_rasters) == 0) {
-      message("No tiles downloaded for year ", yr)
+    message("Downloading ", product_id, ": ", label, " (", nrow(matched), " tile(s)) ...")
+    rs <- lapply(matched$name, .download_viirs_tile,
+      product_id = product_id,
+      acquisition = acquisition, token = token, quality = quality
+    )
+    rs <- Filter(Negate(is.null), rs)
+    if (!length(rs)) {
       return(NULL)
     }
-
-    r <- if (length(tile_rasters) == 1) {
-      tile_rasters[[1]]
-    } else {
-      do.call(terra::mosaic, c(tile_rasters, list(fun = "mean")))
-    }
-
-    r_crop <- terra::crop(r, terra::ext(bbox["xmin"], bbox["xmax"], bbox["ymin"], bbox["ymax"]))
-    terra::writeRaster(r_crop, path, overwrite = TRUE)
-    r_crop
+    r <- if (length(rs) == 1) rs[[1]] else do.call(terra::mosaic, c(rs, list(fun = "mean")))
+    r <- terra::crop(r, terra::ext(bbox["xmin"], bbox["xmax"], bbox["ymin"], bbox["ymax"]))
+    terra::writeRaster(r, path, overwrite = TRUE)
+    .set_ntl_metadata(terra::rast(path), product_id, product)
   })
-
-  names(result) <- as.character(years)
+  names(result) <- names(acquisitions)
   result[!vapply(result, is.null, logical(1))]
 }
 
-.laads_csv_listing <- function(year) {
-  url <- paste0(LAADS_BASE, LAADS_ARCHIVE, "/", year, "/001.csv")
-  tryCatch(
-    utils::read.csv(url, stringsAsFactors = FALSE),
-    error = function(e) {
-      message("LAADS listing failed for year ", year, ": ", conditionMessage(e))
-      NULL
-    }
-  )
+.set_ntl_metadata <- function(r, product, cadence, units = "nW/cm^2/sr") {
+  attr(r, "lightson_product") <- product
+  attr(r, "lightson_cadence") <- cadence
+  attr(r, "lightson_units") <- units
+  r
 }
 
-.download_viirs_tile <- function(fname, year, token) {
-  doy <- substring(fname, 14, 16)
-  url <- paste0(LAADS_BASE, LAADS_ARCHIVE, "/", year, "/", doy, "/", fname)
+.viirs_acquisitions <- function(product, years, dates) {
+  if (product == "annual") {
+    if (is.null(years) || !length(years)) stop("`years` is required for annual data.", call. = FALSE)
+    x <- as.Date(sprintf("%04d-01-01", as.integer(years)))
+    return(stats::setNames(as.list(x), as.character(as.integer(years))))
+  }
+  if (is.null(dates)) {
+    if (product == "daily") stop("`dates` is required for daily data.", call. = FALSE)
+    if (is.null(years) || !length(years)) stop("Supply `years` or `dates` for monthly data.", call. = FALSE)
+    x <- lapply(as.integer(years), function(y) seq(as.Date(sprintf("%d-01-01", y)), as.Date(sprintf("%d-12-01", y)), by = "month"))
+    dates <- do.call(c, x)
+  }
+  x <- as.Date(dates)
+  if (anyNA(x)) stop("`dates` contains invalid dates.", call. = FALSE)
+  if (product == "monthly") x <- as.Date(format(x, "%Y-%m-01"))
+  x <- unique(x)
+  stats::setNames(as.list(x), as.character(x))
+}
+
+.laads_csv_listing <- function(product_id, acquisition) {
+  url <- paste0(
+    LAADS_BASE, LAADS_ARCHIVE, "/", product_id, "/",
+    format(acquisition, "%Y/%j"), ".csv"
+  )
+  tryCatch(utils::read.csv(url, stringsAsFactors = FALSE), error = function(e) {
+    message("LAADS listing failed for ", product_id, " ", acquisition, ": ", conditionMessage(e))
+    NULL
+  })
+}
+
+.download_viirs_tile <- function(fname, product_id, acquisition, token, quality) {
+  url <- paste0(
+    LAADS_BASE, LAADS_ARCHIVE, "/", product_id, "/",
+    format(acquisition, "%Y/%j"), "/", fname
+  )
   tmp <- tempfile(fileext = ".h5")
-
-  req <- httr2::request(url) |>
-    httr2::req_headers(Authorization = paste("Bearer", token)) |>
-    httr2::req_retry(max_tries = 3, backoff = ~ 2 * .x)
-
   tryCatch(
     {
-      resp <- httr2::req_perform(req)
+      resp <- httr2::request(url) |>
+        httr2::req_headers(Authorization = paste("Bearer", token)) |>
+        httr2::req_retry(max_tries = 3, backoff = ~ 2 * .x) |>
+        httr2::req_perform()
       body <- httr2::resp_body_raw(resp)
-      if (length(body) < 10000) {
-        stop("Response too small: token may be invalid or EULA not accepted")
-      }
+      if (length(body) < 10000) stop("Response too small: token invalid or EULA not accepted")
       writeBin(body, tmp)
-      result <- terra::toMemory(.parse_vnp46a4(tmp))
+      out <- terra::toMemory(.parse_black_marble(tmp, product_id, quality))
       unlink(tmp)
-      result
+      out
     },
     error = function(e) {
       message("Tile download failed (", fname, "): ", conditionMessage(e))
@@ -128,33 +143,31 @@ ntl_download <- function(region, years, token, force = FALSE) {
   )
 }
 
-.parse_vnp46a4 <- function(h5_path) {
-  # Collection 2 (2022+): VIIRS_Grid_DNB_2d / AllAngle_Composite_Snow_Free
-  # Collection 1 (pre-2022): VNP_Grid_DNB / Gap_Filled_DNB_BRDF-Corrected_NTL
-  band_c2 <- paste0("HDF5:\"", h5_path, "\"://HDFEOS/GRIDS/VIIRS_Grid_DNB_2d/Data_Fields/AllAngle_Composite_Snow_Free")
-  band_c1 <- paste0("HDF5:\"", h5_path, "\"://HDFEOS/GRIDS/VNP_Grid_DNB/Data Fields/Gap_Filled_DNB_BRDF-Corrected_NTL")
-
-  r <- tryCatch(terra::rast(band_c2), error = function(e) NULL)
-  if (is.null(r)) {
-    r <- tryCatch(terra::rast(band_c1), error = function(e) {
-      message("HDF5 parse failed: ", conditionMessage(e))
-      NULL
-    })
+.parse_black_marble <- function(path, product_id, quality = "high") {
+  s <- terra::sds(path)
+  nms <- names(s)
+  wanted <- if (product_id == "VNP46A2") "Gap.*Filled.*DNB.*BRDF.*Corrected.*NTL" else "AllAngle.*Composite.*Snow.*Free"
+  idx <- grep(wanted, nms, ignore.case = TRUE)
+  if (!length(idx)) stop("Could not find the Black Marble science band in HDF5 file.")
+  r <- s[idx[1]]
+  if (inherits(r, "SpatRasterDataset")) r <- r[[1]]
+  if (product_id == "VNP46A2" && quality == "high") {
+    qidx <- grep("Mandatory.*Quality.*Flag", nms, ignore.case = TRUE)
+    if (length(qidx)) {
+      qa <- s[qidx[1]]
+      if (inherits(qa, "SpatRasterDataset")) qa <- qa[[1]]
+      r <- terra::ifel(qa == 0, r, NA)
+    } else {
+      warning("Daily QA band not found; returning unmasked radiance.", call. = FALSE)
+    }
   }
   r
 }
 
 .bbox_to_viirs_tiles <- function(bbox) {
-  xmin <- bbox["xmin"]
-  xmax <- bbox["xmax"]
-  ymin <- bbox["ymin"]
-  ymax <- bbox["ymax"]
-
-  h_min <- floor((xmin + 180) / 10)
-  h_max <- floor((xmax + 180) / 10)
-  v_min <- floor((90 - ymax) / 10)
-  v_max <- floor((90 - ymin) / 10)
-
-  grid <- expand.grid(h = h_min:h_max, v = v_min:v_max)
+  grid <- expand.grid(
+    h = floor((bbox["xmin"] + 180) / 10):floor((bbox["xmax"] + 180) / 10),
+    v = floor((90 - bbox["ymax"]) / 10):floor((90 - bbox["ymin"]) / 10)
+  )
   lapply(seq_len(nrow(grid)), function(i) list(h = grid$h[i], v = grid$v[i]))
 }

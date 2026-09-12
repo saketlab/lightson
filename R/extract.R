@@ -1,16 +1,17 @@
 #' Compute zonal statistics for a panel of rasters
 #'
-#' Takes a named list of `SpatRaster` objects (one per year, as returned by
+#' Takes a named list of `SpatRaster` objects (one per time period, as returned by
 #' [ntl_download()] or [bhuvan_raster()]) and an `sf` or `SpatVector` polygon
-#' layer, and returns a tidy long-format data frame with one row per
-#' region per year.
+#' layer, and returns a tidy long-format data frame with one row per region and
+#' time period. Annual names such as `"2025"` produce the original four-column
+#' output. ISO-date names used by monthly and daily Black Marble additionally
+#' produce a `date` column.
 #'
 #' The `polygons` argument accepts any `sf` object: GADM, bharatviz GeoJSONs,
 #' LGD districts, or any shapefile loaded with `sf::read_sf()`.
 #'
 #' @param rasters A named list of `SpatRaster` objects. Names should be years
-#'   (e.g., `"2020"`, `"2021"`). Returned by [ntl_download()] or
-#'   [bhuvan_raster()].
+#'   or ISO dates (e.g., `"2020"` or `"2025-11-12"`).
 #' @param polygons An `sf` object or `SpatVector` containing the regions to
 #'   summarise over.
 #' @param fun Aggregation function name passed to [terra::zonal()]. Default
@@ -47,11 +48,25 @@ extract_panel <- function(rasters, polygons, fun = "mean", id_col = NULL) {
 
   id_col <- id_col %||% .first_char_col(polygons)
 
-  rows <- lapply(years, function(yr) {
-    .extract_zonal(rasters[[yr]], polygons, fun = fun, id_col = id_col, year = as.integer(yr))
+  is_annual <- grepl("^[0-9]{4}$", years)
+  if (!all(is_annual) && any(is_annual)) {
+    stop("Raster names must be either all years or all ISO dates.", call. = FALSE)
+  }
+  dates <- if (all(is_annual)) rep(as.Date(NA), length(years)) else as.Date(years)
+  if (!all(is_annual) && anyNA(dates)) stop("Non-annual raster names must be ISO dates.", call. = FALSE)
+
+  rows <- lapply(seq_along(years), function(i) {
+    yr <- if (all(is_annual)) as.integer(years[i]) else as.integer(format(dates[i], "%Y"))
+    row <- .extract_zonal(rasters[[years[i]]], polygons, fun = fun, id_col = id_col, year = yr)
+    if (!all(is_annual)) row$date <- dates[i]
+    row
   })
 
   result <- do.call(rbind, rows)
+  if (!all(is_annual)) {
+    result <- result[, c("region_id", "date", "year", "mean_radiance", "n_pixels")]
+    return(result[order(result$region_id, result$date), ])
+  }
   result[order(result$region_id, result$year), ]
 }
 

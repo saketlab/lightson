@@ -4,7 +4,8 @@ Download and analyse nighttime lights satellite data from R.
 `lightson` supports two data sources:
 
 - **ISRO Bhuvan NTL**: pre-aggregated state radiance for India (2012-2024); WMS raster tiles for any region.
-- **NASA VIIRS Black Marble** (VNP46A4): annual composites from 2012, global coverage. 
+- **NASA VIIRS Black Marble**: annual (VNP46A4), monthly (VNP46A3), and
+  QA-filtered daily (VNP46A2) calibrated radiance from 2012.
 
 The ISRO Bhuvan NTL source does not require any authentication. VIIRS requires a free NASA Earthdata account.
 
@@ -89,7 +90,13 @@ VIIRS gives physical radiance in nW/cm^2/sr, which is useful when you need calib
 ```r
 # read EARTHDATA_TOKEN from environment
 token <- earthdata_token()   
-rasters <- ntl_download(region = "IND", years = 2020:2023, token = token)
+rasters <- ntl_download(region = "IND", years = 2020:2025, token = token)
+
+# Monthly and near-current daily Black Marble
+monthly <- ntl_download("IND", 2025, token, product = "monthly")
+daily <- ntl_download("IND", token = token, product = "daily",
+                      dates = as.Date("2025-11-12"))
+
 panel <- extract_panel(rasters, get_india_admin("state"), id_col = "state_name")
 plot_ntl_trend(panel, region = c("Bihar", "Maharashtra"))
 ```
@@ -105,5 +112,3 @@ Don't mix them with VIIRS radiance in a regression without normalising first.
 Bhuvan NTL data from 2024 onwards uses VNP46A4 Collection 2.0; 2012-2023 uses Collection 1.0. 
 The two collections use different calibration algorithms, so estimates aren't directly comparable across that boundary.
 `lightson` warns automatically when a request spans both.
-
-

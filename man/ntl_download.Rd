@@ -2,34 +2,52 @@
 % Please edit documentation in R/download_viirs.R
 \name{ntl_download}
 \alias{ntl_download}
-\title{Download VIIRS Black Marble annual nighttime lights}
+\title{Download NASA Black Marble nighttime lights}
 \usage{
-ntl_download(region, years, token, force = FALSE)
+ntl_download(
+  region,
+  years = NULL,
+  token,
+  force = FALSE,
+  product = c("annual", "monthly", "daily"),
+  dates = NULL,
+  quality = c("high", "all")
+)
 }
 \arguments{
-\item{region}{An \code{sf} object, \code{SpatVector}, or ISO 3166-1 alpha-3 country
-code (e.g., \code{"IND"}).}
+\item{region}{An \code{sf} object, \code{SpatVector}, or ISO 3166-1 alpha-3 code.}
 
-\item{years}{Integer vector of years to download.}
+\item{years}{Integer years. Required for annual data; selects all twelve
+months for monthly data when \code{dates} is omitted.}
 
-\item{token}{A bearer token string from \code{\link[=earthdata_token]{earthdata_token()}}.}
+\item{token}{NASA Earthdata bearer token from \code{\link[=earthdata_token]{earthdata_token()}}.}
 
-\item{force}{Logical. Re-download even if cached. Default \code{FALSE}.}
+\item{force}{Re-download cached output.}
+
+\item{product}{One of \code{"annual"}, \code{"monthly"}, or \code{"daily"}.}
+
+\item{dates}{Date-like vector. Required for daily data. Monthly dates are
+normalised to the first day of their month.}
+
+\item{quality}{For daily data, \code{"high"} masks pixels whose mandatory QA
+flag is nonzero; \code{"all"} retains every retrieval.}
 }
 \value{
-A named list of \code{SpatRaster} objects, keyed by year.
+Named list of cropped \code{SpatRaster} objects. Names are years for
+annual data and ISO dates otherwise.
 }
 \description{
-Downloads NASA VIIRS/Black Marble VNP46A4 annual composite rasters from
-NASA LAADS DAAC for a given region and year range.
-}
-\details{
-Requires a NASA Earthdata bearer token, see \code{\link[=earthdata_token]{earthdata_token()}}.
+Downloads calibrated VIIRS Black Marble annual (\code{VNP46A4}), monthly
+(\code{VNP46A3}), or daily (\code{VNP46A2}) rasters from NASA LAADS DAAC.
 }
 \examples{
 \dontrun{
 token <- earthdata_token()
-rasters <- ntl_download(region = "IND", years = 2020:2023, token = token)
-panel <- extract_panel(rasters, get_india_admin("district"))
+annual <- ntl_download("IND", 2020:2025, token)
+monthly <- ntl_download("IND", 2025, token, product = "monthly")
+daily <- ntl_download("IND",
+  token = token, product = "daily",
+  dates = as.Date("2025-11-12")
+)
 }
 }

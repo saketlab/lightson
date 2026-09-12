@@ -33,7 +33,7 @@ Tiles are cached in `~/.lightson/cache/` after the first download.
 library(lightson)
 
 token <- earthdata_token()
-rasters <- ntl_download(region = "IND", years = 2015:2023, token = token)
+rasters <- ntl_download(region = "IND", years = 2015:2025, token = token)
 districts <- get_india_admin(level = "district")
 panel <- extract_panel(rasters, districts)
 plot_ntl_trend(panel, region = "Lucknow")

@@ -1,14 +1,14 @@
 Package: lightson
 Title: Download and Analyse Nighttime Lights Satellite Data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
     person("Saket", "Choudhary",
            email = "saketc@iitb.ac.in",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5202-7633"))
 Description: Downloads and processes nighttime lights (NTL) satellite data
-    from NASA VIIRS/Black Marble (VNP46A4 annual composites) and India's 
-    ISRO Bhuvan NTL portal.
+    from NASA VIIRS/Black Marble (daily, monthly, and annual composites)
+    and India's ISRO Bhuvan NTL portal.
 License: MIT + file LICENSE
 Depends: R (>= 4.1.0)
 Encoding: UTF-8

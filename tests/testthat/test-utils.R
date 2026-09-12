@@ -23,3 +23,33 @@ test_that(".rgb_to_luminance returns input unchanged for single-band raster", {
   terra::values(r) <- 42
   expect_equal(terra::nlyr(lightson:::.rgb_to_luminance(r)), 1L)
 })
+
+test_that("ntl_index indexes within source and region", {
+  panel <- expand.grid(
+    source = c("a", "b"), region_id = c("x", "y"),
+    year = 2020:2021, stringsAsFactors = FALSE
+  )
+  panel$mean_radiance <- c(10, 20, 5, 10, 15, 30, 10, 20)
+  result <- ntl_index(panel, 2020, c("source", "region_id"))
+  expect_true(all(result$ntl_index[result$year == 2020] == 100))
+  expect_true(all(is.finite(result$ntl_index)))
+})
+
+test_that("ntl_index leaves groups without a valid baseline as NA", {
+  panel <- data.frame(region_id = "x", year = 2021, mean_radiance = 4)
+  expect_true(is.na(ntl_index(panel, 2020)$ntl_index))
+})
+
+test_that("ntl_source_agreement aligns panels and calculates correlation", {
+  x <- data.frame(
+    region_id = rep(c("a", "b"), each = 3), year = rep(2020:2022, 2),
+    mean_radiance = c(1, 2, 3, 2, 4, 6)
+  )
+  y <- data.frame(
+    region_id = rep(c("a", "b"), each = 3), year = rep(2020:2022, 2),
+    mean_radiance = c(2, 4, 6, 6, 4, 2)
+  )
+  result <- ntl_source_agreement(x, y)
+  expect_equal(result$correlation, c(-1, 1))
+  expect_equal(result$observations, c(3L, 3L))
+})

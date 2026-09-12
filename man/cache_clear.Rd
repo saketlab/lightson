@@ -7,7 +7,7 @@
 cache_clear(source = NULL)
 }
 \arguments{
-\item{source}{One of \code{"viirs"}, \code{"bhuvan"}, or \code{NULL} (clears everything).}
+\item{source}{One of \code{"viirs"}, \code{"bhuvan"}, or \code{NULL}.}
 }
 \value{
 Invisibly returns the number of files removed.

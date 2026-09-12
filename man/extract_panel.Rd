@@ -8,8 +8,7 @@ extract_panel(rasters, polygons, fun = "mean", id_col = NULL)
 }
 \arguments{
 \item{rasters}{A named list of \code{SpatRaster} objects. Names should be years
-(e.g., \code{"2020"}, \code{"2021"}). Returned by \code{\link[=ntl_download]{ntl_download()}} or
-\code{\link[=bhuvan_raster]{bhuvan_raster()}}.}
+or ISO dates (e.g., \code{"2020"} or \code{"2025-11-12"}).}
 
 \item{polygons}{An \code{sf} object or \code{SpatVector} containing the regions to
 summarise over.}
@@ -30,10 +29,12 @@ A data frame with columns:
 }
 }
 \description{
-Takes a named list of \code{SpatRaster} objects (one per year, as returned by
+Takes a named list of \code{SpatRaster} objects (one per time period, as returned by
 \code{\link[=ntl_download]{ntl_download()}} or \code{\link[=bhuvan_raster]{bhuvan_raster()}}) and an \code{sf} or \code{SpatVector} polygon
-layer, and returns a tidy long-format data frame with one row per
-region per year.
+layer, and returns a tidy long-format data frame with one row per region and
+time period. Annual names such as \code{"2025"} produce the original four-column
+output. ISO-date names used by monthly and daily Black Marble additionally
+produce a \code{date} column.
 }
 \details{
 The \code{polygons} argument accepts any \code{sf} object: GADM, bharatviz GeoJSONs,

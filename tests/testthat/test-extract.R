@@ -32,3 +32,17 @@ test_that("extract_panel years in output match raster names", {
   result <- extract_panel(rasters, make_polygons(), id_col = "region_id")
   expect_equal(sort(unique(result$year)), c(2019L, 2022L))
 })
+
+test_that("extract_panel supports monthly and daily ISO-date names", {
+  rasters <- list("2025-01-01" = make_raster(), "2025-02-01" = make_raster())
+  result <- extract_panel(rasters, make_polygons(), id_col = "region_id")
+  expect_named(result, c("region_id", "date", "year", "mean_radiance", "n_pixels"))
+  expect_s3_class(result$date, "Date")
+  expect_equal(sort(unique(result$date)), as.Date(c("2025-01-01", "2025-02-01")))
+  expect_equal(unique(result$year), 2025L)
+})
+
+test_that("extract_panel rejects mixed annual and dated raster names", {
+  rasters <- list("2024" = make_raster(), "2025-01-01" = make_raster())
+  expect_error(extract_panel(rasters, make_polygons(), id_col = "region_id"), "either all")
+})

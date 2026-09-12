@@ -149,6 +149,8 @@ navbar:
         href: articles/india-electrification.html
       - text: "Custom geometry: district-level NTL"
         href: articles/custom-geometry.html
+      - text: "Choosing and comparing NTL sources"
+        href: articles/source-comparison.html
 
     github:
       icon: fab fa-github fa-lg
@@ -167,6 +169,8 @@ reference:
   desc: "Compute zonal statistics over spatial polygons"
   contents:
   - extract_panel
+  - ntl_index
+  - ntl_source_agreement
 
 - title: "Visualisation"
   desc: "Plot trends and maps"

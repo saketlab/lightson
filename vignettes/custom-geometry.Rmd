@@ -73,41 +73,36 @@ plot_ntl_map(
 
 ## District-level workflow
 
-```{r}
+```{r district-boundaries, eval = FALSE}
 BHARATVIZ <- "https://bharatviz.org"
 
-districts <- tryCatch(
-  sf::read_sf(file.path(BHARATVIZ, "India-bhuvan-districts.geojson")),
-  error = function(e) NULL
+districts <- sf::read_sf(
+  file.path(BHARATVIZ, "India-bhuvan-districts.geojson")
 )
-if (is.null(districts)) {
-  message("bharatviz not reachable, skipping district examples")
-  knitr::opts_chunk$set(eval = FALSE)
-}
 nrow(districts)
 ```
 
-```{r download-rasters}
+```{r download-rasters, eval = FALSE}
 rasters_dist <- bhuvan_raster(districts, years = 2018:2023)
 names(rasters_dist)
 ```
 
-```{r extract-panel}
+```{r extract-panel, eval = FALSE}
 panel_dist <- extract_panel(rasters_dist, districts, id_col = "district_name")
 head(panel_dist)
 ```
 
-```{r plot-trend, fig.width = 7, fig.height = 4}
+```{r plot-trend, eval = FALSE, fig.width = 7, fig.height = 4}
 plot_ntl_trend(panel_dist, region = c("Mumbai", "Delhi", "Chennai", "Bengaluru"))
 ```
 
-```{r plot-map, fig.width = 7, fig.height = 6}
+```{r plot-map, eval = FALSE, fig.width = 7, fig.height = 6}
 plot_ntl_map(rasters_dist[["2022"]], polygons = districts)
 ```
 
 ### LGD boundaries
 
-```{r lgd}
+```{r lgd, eval = FALSE}
 lgd <- sf::read_sf(file.path(BHARATVIZ, "India_LGD_districts.geojson"))
 panel_lgd <- extract_panel(rasters_dist, lgd, id_col = "district_name")
 head(panel_lgd)
@@ -115,7 +110,7 @@ head(panel_lgd)
 
 ### Historical census boundaries
 
-```{r historical}
+```{r historical, eval = FALSE}
 dist_2011 <- sf::read_sf(file.path(BHARATVIZ, "India-2011-districts.geojson"))
 panel_2011 <- extract_panel(rasters_dist, dist_2011)
 head(panel_2011)
@@ -130,7 +125,7 @@ or pass `id_col` explicitly.
 
 To use NASA VIIRS rasters, supply an [Earthdata token](https://urs.earthdata.nasa.gov/):
 
-```{r viirs}
+```{r viirs, eval = FALSE}
 token <- earthdata_token()
 rasters_viirs <- ntl_download(region = districts, years = 2018:2023, token = token)
 if (length(rasters_viirs) > 0) {

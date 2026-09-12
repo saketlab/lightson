@@ -39,7 +39,7 @@ BHUVAN_WMS_LAYER <- "ntl:BhuvanNTL"
 #'
 #' Removes cached raster files downloaded by `ntl_download()` or `bhuvan_raster()`.
 #'
-#' @param source One of `"viirs"`, `"bhuvan"`, or `NULL` (clears everything).
+#' @param source One of `"viirs"`, `"bhuvan"`, or `NULL`.
 #' @return Invisibly returns the number of files removed.
 #' @export
 cache_clear <- function(source = NULL) {
@@ -53,6 +53,99 @@ cache_clear <- function(source = NULL) {
 
 .cache_hit <- function(path, force) {
   !force && file.exists(path)
+}
+
+#' Index nighttime-light values to a baseline period
+#'
+#' Converts each group's values to an index where its baseline observation is
+#' 100. This is useful for comparing changes between sources with different
+#' units, but does not make their absolute levels comparable.
+#'
+#' @param panel Data frame containing nighttime-light observations.
+#' @param baseline Baseline value in `time_col`, such as `2020` or an ISO date.
+#' @param group_cols Grouping columns. If omitted, uses `source` when present
+#'   plus `region_id` or `state`.
+#' @param time_col Time column name. Defaults to `"year"`.
+#' @param value_col Value column name. Defaults to `"mean_radiance"`.
+#' @param index_col Name for the new index column.
+#' @return `panel` with an additional numeric index column.
+#' @export
+ntl_index <- function(panel, baseline, group_cols = NULL, time_col = "year",
+                      value_col = "mean_radiance", index_col = "ntl_index") {
+  needed <- c(time_col, value_col)
+  if (!all(needed %in% names(panel))) {
+    stop("`panel` is missing required columns: ",
+      paste(setdiff(needed, names(panel)), collapse = ", "),
+      call. = FALSE
+    )
+  }
+  if (is.null(group_cols)) {
+    id <- intersect(c("region_id", "state"), names(panel))[1]
+    group_cols <- c(if ("source" %in% names(panel)) "source", id)
+    group_cols <- group_cols[!is.na(group_cols)]
+  }
+  if (!length(group_cols) || !all(group_cols %in% names(panel))) {
+    stop("`group_cols` must identify columns in `panel`.", call. = FALSE)
+  }
+
+  key <- interaction(panel[group_cols], drop = TRUE, lex.order = TRUE)
+  groups <- split(seq_len(nrow(panel)), key)
+  out <- rep(NA_real_, nrow(panel))
+  for (idx in groups) {
+    base <- panel[[value_col]][idx[panel[[time_col]][idx] == baseline]]
+    if (length(base) != 1L || is.na(base) || base == 0) next
+    out[idx] <- 100 * panel[[value_col]][idx] / base
+  }
+  panel[[index_col]] <- out
+  panel
+}
+
+#' Measure agreement between two nighttime-light panels
+#'
+#' Aligns observations by region and time, then calculates within-region
+#' correlation between two sources. Correlation compares co-movement, not
+#' absolute levels or units.
+#'
+#' @param x,y Panel data frames, such as outputs from [extract_panel()].
+#' @param id_col Region identifier column.
+#' @param time_col Shared time column.
+#' @param value_col Measurement column in both panels.
+#' @param method Correlation method passed to [stats::cor()].
+#' @return Data frame with region, correlation, and paired observation count.
+#' @export
+ntl_source_agreement <- function(x, y, id_col = "region_id", time_col = "year",
+                                 value_col = "mean_radiance",
+                                 method = c("pearson", "spearman", "kendall")) {
+  method <- match.arg(method)
+  needed <- c(id_col, time_col, value_col)
+  if (!all(needed %in% names(x)) || !all(needed %in% names(y))) {
+    stop("Both panels must contain: ", paste(needed, collapse = ", "), call. = FALSE)
+  }
+  joined <- merge(x[needed], y[needed],
+    by = c(id_col, time_col),
+    suffixes = c("_x", "_y")
+  )
+  value_x <- paste0(value_col, "_x")
+  value_y <- paste0(value_col, "_y")
+  regions <- split(joined, joined[[id_col]])
+  rows <- lapply(regions, function(z) {
+    complete <- stats::complete.cases(z[[value_x]], z[[value_y]])
+    zx <- z[[value_x]][complete]
+    zy <- z[[value_y]][complete]
+    estimate <- if (length(zx) < 2L || stats::sd(zx) == 0 || stats::sd(zy) == 0) {
+      NA_real_
+    } else {
+      stats::cor(zx, zy, method = method)
+    }
+    data.frame(
+      region_id = as.character(z[[id_col]][1]), correlation = estimate,
+      observations = length(zx), stringsAsFactors = FALSE
+    )
+  })
+  result <- do.call(rbind, rows)
+  rownames(result) <- NULL
+  names(result)[1] <- id_col
+  result[order(result$correlation, na.last = TRUE), ]
 }
 
 .warn_collection_break <- function(years) {

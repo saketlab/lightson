@@ -1,0 +1,221 @@
+---
+title: "Choosing and comparing nighttime-light sources"
+description: >
+  Compare Bhuvan and NASA Black Marble coverage, units, authentication,
+  and appropriate India workflows.
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Choosing and comparing nighttime-light sources}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+`lightson` exposes related but non-interchangeable products. Choose a
+source based on the period, update frequency, measurement units, and intended
+analysis. Do not append their raw values into a single time series.
+
+## At a glance
+
+| Source/product | Coverage | Cadence | Approx. resolution | Values | Authentication |
+|---|---:|---:|---:|---|---|
+| ISRO Bhuvan NTL | 2012--2024 | Annual | 500 m | RGB-derived BT.709 luminance | None |
+| NASA VNP46A4 | 2012--2025 | Annual | 500 m | Radiance, nW/cm^2/sr | Earthdata token |
+| NASA VNP46A3 | 2012--present | Monthly | 500 m | Radiance, nW/cm^2/sr | Earthdata token |
+| NASA VNP46A2 | 2012--near-present | Daily | 500 m | Radiance, nW/cm^2/sr | Earthdata token |
+
+Availability can lag acquisition. In particular, completed annual composites
+are normally published well into the following year. Check the provider when
+reproducibility depends on an exact latest date.
+
+## Bhuvan: simple India annual data
+
+Bhuvan is convenient when an unauthenticated India-only workflow matters. Its
+state statistics endpoint returns physical radiance statistics, but its WMS
+serves rendered RGB imagery. `bhuvan_raster()` therefore converts WMS colours
+to dimensionless luminance; it cannot recover the original radiance.
+
+```{r bhuvan, eval = TRUE}
+library(lightson)
+
+state_stats <- bhuvan_stats(years = 2012:2024)
+bhuvan_maps <- bhuvan_raster("IND",
+  years = 2020:2024,
+  bbox_pad = c(0, 0, 0, 3.5)
+)
+```
+
+Bhuvan uses VNP46A4 Collection 1 for 2012-2023 and Collection 2 from 2024.
+The processing change creates a discontinuity, so a 2023-2024 difference
+must not be interpreted directly as growth. For a consistent calibrated
+2012-2025 annual panel, prefer NASA Collection 2 for every year.
+
+## NASA Black Marble: annual, monthly, and daily
+
+All three NASA products use the same Earthdata bearer token:
+
+```{r black-marble, eval = TRUE}
+token <- earthdata_token()
+
+annual <- ntl_download(
+  "IND",
+  years = 2012:2025, token = token,
+  product = "annual"
+)
+
+monthly_2025 <- ntl_download(
+  "IND",
+  years = 2025, token = token,
+  product = "monthly"
+)
+
+recent_days <- ntl_download(
+  "IND",
+  token = token, product = "daily",
+  dates = seq(as.Date("2025-11-01"), as.Date("2025-11-07"), by = "day")
+)
+```
+
+Daily downloads default to `quality = "high"`, retaining mandatory QA flag
+zero. This rejects cloud contamination and other poor retrievals but can leave
+missing pixels. Use `quality = "all"` only when you intend to inspect and
+apply the quality bands yourself. Daily data are near-current rather than a
+true real-time feed.
+
+Use annual data for long-run development panels, monthly data for seasonal or
+short-run economic change, and daily data for narrowly dated events such as
+power outages. Aggregating QA-filtered daily observations into a monthly
+statistic is not automatically equivalent to the official VNP46A3 composite.
+
+## Comparison
+
+Use the same polygons and aggregation statistic for both sources. Here the
+comparison is restricted to 2020--2023 so it does not cross Bhuvan's 2024
+collection break.
+
+```{r comparison, eval = TRUE}
+districts <- get_india_admin("district")
+
+viirs_panel <- extract_panel(annual[names(annual) %in% 2020:2023],
+  districts,
+  id_col = "district_name"
+)
+viirs_panel$source <- "NASA VNP46A4 C2"
+viirs_panel$units <- "nW/cm^2/sr"
+
+bhuvan_panel <- extract_panel(bhuvan_maps[names(bhuvan_maps) %in% 2020:2023],
+  districts,
+  id_col = "district_name"
+)
+bhuvan_panel$source <- "ISRO Bhuvan WMS"
+bhuvan_panel$units <- "BT.709 luminance"
+```
+
+Raw levels cannot be compared because the units differ. A useful diagnostic is
+to express each district and source relative to its own 2020 value. An index of
+120 then means that the source reports a 20% increase since 2020; it does not
+mean that the two sensors observed the same absolute brightness.
+
+```{r indexed-comparison, eval = TRUE}
+comparison <- rbind(viirs_panel, bhuvan_panel)
+comparison <- ntl_index(
+  comparison,
+  baseline = 2020,
+  group_cols = c("source", "region_id"),
+  index_col = "index_2020"
+)
+
+selected <- c("Mumbai", "Patna", "Bengaluru", "Lucknow")
+plot_data <- comparison[comparison$region_id %in% selected, ]
+
+library(ggplot2)
+ggplot(plot_data, aes(year, index_2020, colour = source)) +
+  geom_hline(yintercept = 100, colour = "grey60", linetype = 2) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 2) +
+  facet_wrap(~region_id) +
+  labs(
+    x = NULL, y = "Index (2020 = 100)",
+    title = "Within-source nighttime-light change",
+    subtitle = "Index trajectories are comparable; raw levels are not",
+    colour = NULL
+  ) +
+  theme_ntl() +
+  theme(legend.position = "bottom")
+```
+
+Check whether conclusions depend on the source instead of relying only on the
+figure. The following produces one correlation per district across the four
+overlap years and ranks districts with the weakest agreement:
+
+```{r agreement, eval = TRUE}
+agreement <- ntl_source_agreement(viirs_panel, bhuvan_panel)
+head(agreement, 10)
+```
+
+With only four overlap observations this correlation is a diagnostic, not a
+validation statistic. Investigate weak agreement for boundary mismatch,
+cloud/observation coverage, bright-pixel saturation, and processing changes.
+
+## Analyse monthly seasonality
+
+`extract_panel()` recognises ISO-date raster names and adds a `date` column.
+This makes the monthly product directly usable as a temporal panel:
+
+```{r monthly-analysis, eval = TRUE}
+monthly_panel <- extract_panel(monthly_2025, districts,
+  id_col = "district_name"
+)
+
+monthly_plot <- monthly_panel[monthly_panel$region_id %in% selected, ]
+ggplot(monthly_plot, aes(date, mean_radiance, colour = region_id)) +
+  geom_line(linewidth = 0.8) +
+  geom_point(size = 1.8) +
+  labs(
+    x = NULL, y = "Mean radiance (nW/cm^2/sr)",
+    title = "Monthly nighttime lights in 2025",
+    colour = NULL
+  ) +
+  theme_ntl() +
+  theme(legend.position = "bottom")
+```
+
+For formal seasonality analysis, download multiple complete years and include
+month effects. A single year cannot distinguish a recurring seasonal pattern
+from a one-off shock.
+
+## Analyse a daily event window
+
+Daily values are most informative alongside coverage. A sudden radiance fall
+with a simultaneous collapse in `n_pixels` is more likely missing retrievals
+than a power outage.
+
+```{r daily-analysis, eval = TRUE}
+daily_panel <- extract_panel(recent_days, districts,
+  id_col = "district_name"
+)
+event <- daily_panel[daily_panel$region_id == "Delhi", ]
+
+old_par <- par(mfrow = c(2, 1), mar = c(3, 4, 2, 1))
+plot(event$date, event$mean_radiance,
+  type = "b",
+  xlab = "", ylab = "Mean radiance",
+  main = "Daily light and valid-pixel coverage"
+)
+plot(event$date, event$n_pixels,
+  type = "h",
+  xlab = "Date", ylab = "Valid pixels"
+)
+par(old_par)
+```
+
+For an outage study, use pre-event and post-event windows, compare affected
+districts with unaffected controls, and record the exact QA rule. Do not fill
+cloudy daily observations with zero.
+
+For most India economic panels, the preferred core series is VNP46A4
+Collection 2 from 2012 onward. Bhuvan remains useful for unauthenticated India
+exploration and for its pre-aggregated state statistics.
