@@ -91,6 +91,11 @@ plot_ntl_trend <- function(panel,
     stop("Install the 'scales' package to use plot_ntl_trend().", call. = FALSE)
   }
 
+  if (!is.data.frame(panel)) {
+    stop("`panel` must be a data frame (got NULL or ", class(panel)[1], "); ",
+         "the upstream download likely failed.", call. = FALSE)
+  }
+
   df <- panel
   id_col <- intersect(c("region_id", "state"), names(df))[1]
   if (is.na(id_col)) stop("`panel` must have a `region_id` or `state` column.", call. = FALSE)
