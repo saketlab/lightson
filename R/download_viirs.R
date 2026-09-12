@@ -129,7 +129,10 @@ ntl_download <- function(region, years = NULL, token, force = FALSE,
         httr2::req_retry(max_tries = 3, backoff = ~ 2 * .x) |>
         httr2::req_perform()
       body <- httr2::resp_body_raw(resp)
-      if (length(body) < 10000) stop("Response too small: token invalid or EULA not accepted")
+      is_html <- length(body) >= 5 && rawToChar(body[1:5]) %in% c("<!DOC", "<html", "<HTML")
+      if (is_html || length(body) < 10000) {
+        stop("Received an HTML page instead of an HDF5 file: token invalid or EULA not accepted for this dataset.")
+      }
       writeBin(body, tmp)
       out <- terra::toMemory(.parse_black_marble(tmp, product_id, quality))
       unlink(tmp)
