@@ -8,3 +8,4 @@
 ^_pkgdown\.yml$
 ^GOALS\.md$
 ^LICENSE\.md$
+^vignettes/.*\.Rmd\.orig$
