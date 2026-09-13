@@ -169,6 +169,9 @@ ntl_source_agreement <- function(x, y, id_col = "region_id", time_col = "year",
 }
 
 .resolve_region <- function(region) {
+  if (identical(region, "IND")) {
+    return(get_india_admin("state"))
+  }
   if (is.character(region) && nchar(region) == 3) {
     if (!requireNamespace("geodata", quietly = TRUE)) {
       stop("Install the 'geodata' package to use ISO country codes as regions.", call. = FALSE)

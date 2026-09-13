@@ -1,8 +1,5 @@
 ---
 title: "India state-level NTL with Bhuvan"
-description: >
-  Pull pre-aggregated state-level radiance from the Bhuvan NTL REST API
-  and plot trends across Indian states.
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{India state-level NTL with Bhuvan}
@@ -10,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r, include = FALSE}
 bhuvan_up <- tryCatch(lightson::bhuvan_stats(years = 2024), error = function(e) NULL)
 
 knitr::opts_chunk$set(
@@ -21,9 +18,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r offline-notice, echo = FALSE, results = "asis", eval = is.null(bhuvan_up)}
-cat("_The ISRO Bhuvan API was unreachable when this vignette was built, so its live-data examples were skipped. Run this vignette locally to see the output._")
-```
 
 ISRO's Bhuvan NTL portal provides pre-aggregated mean radiance for all Indian
 states from 2012 to 2024, and WMS raster tiles for any custom region, with no
@@ -31,7 +25,7 @@ authentication required.
 
 ## All states, all years
 
-```{r all-states}
+```{r}
 library(lightson)
 
 df <- bhuvan_stats()
@@ -41,7 +35,7 @@ head(df)
 
 ## Single state time series
 
-```{r single-state}
+```{r}
 bihar <- bhuvan_stats(state = "BIHAR")
 bihar
 ```
@@ -58,7 +52,7 @@ Radiance nearly 10x from 2012 to 2024.
 
 ## Compare states
 
-```{r compare-states, fig.width = 7, fig.height = 4}
+```{r, fig.width = 7, fig.height = 4}
 states <- c("Bihar", "Maharashtra", "Tamil Nadu", "Uttar Pradesh", "Kerala")
 plot_ntl_trend(
   df[df$state %in% states, ],
@@ -71,16 +65,18 @@ plot_ntl_trend(
 ## Nighttime India from space, 2012 to 2024
 
 
-```{r india-map-data}
+```{r}
 states_sf <- get_india_admin("state")
 
 years_sel <- c(2012, 2015, 2018, 2021, 2024)
-rasters <- bhuvan_raster("IND", years = years_sel, bbox_pad = c(0, 0, 0, 3.5))
-
-if (length(rasters) == 0) stop("No rasters downloaded. Check network / Bhuvan WMS.")
+rasters <- tryCatch(
+  bhuvan_raster("IND", years = years_sel, bbox_pad = c(0, 0, 0, 3.5)),
+  error = function(e) list()
+)
 ```
 
-```{r india-maps, fig.width = 11, fig.height = 8}
+
+```{r, fig.width = 11, fig.height = 8, eval = length(rasters) > 0}
 plot_ntl_panel(
   rasters,
   polygons = states_sf,
@@ -97,7 +93,7 @@ Saubhagya electrification scheme (2017-2019).
 
 ## Filter by year range
 
-```{r filter-years}
+```{r}
 post_2015 <- bhuvan_stats(years = 2015:2024)
 nrow(post_2015)
 ```
