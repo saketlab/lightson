@@ -11,11 +11,20 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+library(lightson)
+rasters <- tryCatch(bhuvan_raster("IND", years = 2020:2022), error = function(e) list())
+live_ok <- length(rasters) > 0
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment  = "#>",
-  dev.args = list(bg = "transparent")
+  dev.args = list(bg = "transparent"),
+  eval     = live_ok
 )
+```
+
+```{r offline-notice, echo = FALSE, results = "asis", eval = !live_ok}
+cat("_The ISRO Bhuvan WMS was unreachable when this vignette was built, so its live-data examples were skipped. Run this vignette locally to see the output._")
 ```
 
 `lightson` accepts any `sf` polygon layer. The workflow below starts with the
@@ -25,7 +34,6 @@ bundled LGD state boundaries, then swaps in district-level GeoJSONs from
 ## State-level workflow (bundled boundaries)
 
 ```{r state-boundaries}
-library(lightson)
 library(sf)
 
 states <- get_india_admin("state")
@@ -37,7 +45,6 @@ Download Bhuvan WMS rasters for a subset of years. `bhuvan_raster()` derives
 the bounding box from the geometry:
 
 ```{r state-rasters}
-rasters <- bhuvan_raster(states, years = 2020:2022)
 names(rasters)
 rasters[["2022"]]
 ```
