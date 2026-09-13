@@ -11,7 +11,16 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+bhuvan_up <- tryCatch(lightson::bhuvan_stats(years = 2024), error = function(e) NULL)
+has_earthdata <- !is.na(Sys.getenv("EARTHDATA_TOKEN", unset = NA)) ||
+  !is.na(Sys.getenv("EARTHDATA_USERNAME", unset = NA))
+live_ok <- !is.null(bhuvan_up) && has_earthdata
+
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = live_ok)
+```
+
+```{r offline-notice, echo = FALSE, results = "asis", eval = !live_ok}
+cat("_This vignette needs both the ISRO Bhuvan API and a NASA Earthdata token, and at least one was unavailable when this vignette was built, so its live-data examples were skipped. Run this vignette locally (with `EARTHDATA_TOKEN` set) to see the output._")
 ```
 
 `lightson` exposes related but non-interchangeable products. Choose a
@@ -38,12 +47,12 @@ state statistics endpoint returns physical radiance statistics, but its WMS
 serves rendered RGB imagery. `bhuvan_raster()` therefore converts WMS colours
 to dimensionless luminance; it cannot recover the original radiance.
 
-```{r bhuvan, eval = TRUE}
+```{r bhuvan}
 library(lightson)
 
 state_stats <- bhuvan_stats(years = 2012:2024)
 bhuvan_maps <- bhuvan_raster("IND",
-  years = 2020:2024,
+  years = 2020:2022,
   bbox_pad = c(0, 0, 0, 3.5)
 )
 ```
@@ -57,25 +66,25 @@ must not be interpreted directly as growth. For a consistent calibrated
 
 All three NASA products use the same Earthdata bearer token:
 
-```{r black-marble, eval = TRUE}
+```{r black-marble}
 token <- earthdata_token()
 
 annual <- ntl_download(
   "IND",
-  years = 2012:2025, token = token,
+  years = 2020:2022, token = token,
   product = "annual"
 )
 
 monthly_2025 <- ntl_download(
   "IND",
-  years = 2025, token = token,
-  product = "monthly"
+  dates = seq(as.Date("2025-01-01"), as.Date("2025-02-01"), by = "month"),
+  token = token, product = "monthly"
 )
 
 recent_days <- ntl_download(
   "IND",
   token = token, product = "daily",
-  dates = seq(as.Date("2025-11-01"), as.Date("2025-11-07"), by = "day")
+  dates = seq(as.Date("2025-11-01"), as.Date("2025-11-02"), by = "day")
 )
 ```
 
@@ -93,20 +102,20 @@ statistic is not automatically equivalent to the official VNP46A3 composite.
 ## Comparison
 
 Use the same polygons and aggregation statistic for both sources. Here the
-comparison is restricted to 2020--2023 so it does not cross Bhuvan's 2024
+comparison is restricted to 2020--2022 so it does not cross Bhuvan's 2024
 collection break.
 
-```{r comparison, eval = TRUE}
+```{r comparison}
 districts <- get_india_admin("district")
 
-viirs_panel <- extract_panel(annual[names(annual) %in% 2020:2023],
+viirs_panel <- extract_panel(annual[names(annual) %in% 2020:2022],
   districts,
   id_col = "district_name"
 )
 viirs_panel$source <- "NASA VNP46A4 C2"
 viirs_panel$units <- "nW/cm^2/sr"
 
-bhuvan_panel <- extract_panel(bhuvan_maps[names(bhuvan_maps) %in% 2020:2023],
+bhuvan_panel <- extract_panel(bhuvan_maps[names(bhuvan_maps) %in% 2020:2022],
   districts,
   id_col = "district_name"
 )
@@ -119,7 +128,7 @@ to express each district and source relative to its own 2020 value. An index of
 120 then means that the source reports a 20% increase since 2020; it does not
 mean that the two sensors observed the same absolute brightness.
 
-```{r indexed-comparison, eval = TRUE}
+```{r indexed-comparison}
 comparison <- rbind(viirs_panel, bhuvan_panel)
 comparison <- ntl_index(
   comparison,
@@ -148,24 +157,23 @@ ggplot(plot_data, aes(year, index_2020, colour = source)) +
 ```
 
 Check whether conclusions depend on the source instead of relying only on the
-figure. The following produces one correlation per district across the four
+figure. The following produces one correlation per district across the three
 overlap years and ranks districts with the weakest agreement:
 
-```{r agreement, eval = TRUE}
+```{r agreement}
 agreement <- ntl_source_agreement(viirs_panel, bhuvan_panel)
 head(agreement, 10)
 ```
 
-With only four overlap observations this correlation is a diagnostic, not a
-validation statistic. Investigate weak agreement for boundary mismatch,
-cloud/observation coverage, bright-pixel saturation, and processing changes.
+With only three overlap observations this correlation is a diagnostic, not a
+validation statistic. 
 
 ## Analyse monthly seasonality
 
 `extract_panel()` recognises ISO-date raster names and adds a `date` column.
 This makes the monthly product directly usable as a temporal panel:
 
-```{r monthly-analysis, eval = TRUE}
+```{r monthly-analysis}
 monthly_panel <- extract_panel(monthly_2025, districts,
   id_col = "district_name"
 )
@@ -193,7 +201,7 @@ Daily values are most informative alongside coverage. A sudden radiance fall
 with a simultaneous collapse in `n_pixels` is more likely missing retrievals
 than a power outage.
 
-```{r daily-analysis, eval = TRUE}
+```{r daily-analysis}
 daily_panel <- extract_panel(recent_days, districts,
   id_col = "district_name"
 )

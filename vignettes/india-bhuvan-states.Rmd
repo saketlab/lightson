@@ -11,12 +11,7 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-bhuvan_up <- tryCatch(
-  httr2::req_perform(httr2::req_timeout(httr2::request(
-    "https://bhuvan-app1.nrsc.gov.in/api/nightlight/curl/getIndiaStats.php"
-  ), 10)),
-  error = function(e) NULL
-)
+bhuvan_up <- tryCatch(lightson::bhuvan_stats(years = 2024), error = function(e) NULL)
 
 knitr::opts_chunk$set(
   collapse = TRUE,
