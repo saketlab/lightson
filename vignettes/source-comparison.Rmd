@@ -106,7 +106,7 @@ comparison is restricted to 2020--2022 so it does not cross Bhuvan's 2024
 collection break.
 
 ```{r comparison}
-districts <- get_india_admin("district")
+districts <- get_india_admin("district", source = "bhuvan")
 
 viirs_panel <- extract_panel(annual[names(annual) %in% 2020:2022],
   districts,
