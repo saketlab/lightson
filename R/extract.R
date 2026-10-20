@@ -27,12 +27,19 @@
 #'   }
 #' @export
 #' @examples
-#' \dontrun{
-#' districts <- sf::read_sf("https://bharatviz.org/India-bhuvan-districts.geojson")
-#' rasters <- bhuvan_raster(districts, years = 2018:2023)
-#' panel <- extract_panel(rasters, districts)
-#' head(panel)
+#' r <- terra::rast(
+#'   nrows = 10, ncols = 10, xmin = 0, xmax = 10, ymin = 0, ymax = 10,
+#'   crs = "EPSG:4326", vals = 1:100
+#' )
+#' rasters <- list("2020" = r, "2021" = r * 2)
+#' square <- function(x0) {
+#'   sf::st_polygon(list(cbind(c(x0, x0 + 5, x0 + 5, x0, x0), c(0, 0, 10, 10, 0))))
 #' }
+#' regions <- sf::st_sf(
+#'   region = c("west", "east"),
+#'   geometry = sf::st_sfc(square(0), square(5), crs = 4326)
+#' )
+#' extract_panel(rasters, regions, id_col = "region")
 extract_panel <- function(rasters, polygons, fun = "mean", id_col = NULL) {
   if (!is.list(rasters) || length(rasters) == 0) {
     stop("`rasters` must be a non-empty named list of SpatRaster objects.", call. = FALSE)

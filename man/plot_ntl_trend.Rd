@@ -34,9 +34,13 @@ Line chart of mean radiance over time for one or more regions. Accepts
 output from \code{\link[=extract_panel]{extract_panel()}} or \code{\link[=bhuvan_stats]{bhuvan_stats()}}.
 }
 \examples{
-\dontrun{
-panel <- extract_panel(rasters, districts)
-plot_ntl_trend(panel, region = "Lucknow")
-plot_ntl_trend(panel, region = c("Mumbai", "Delhi", "Chennai"))
-}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("scales", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+panel <- data.frame(
+  region_id = rep(c("Lucknow", "Patna"), each = 4),
+  year = rep(2018:2021, 2),
+  mean_radiance = c(8.1, 8.6, 8.4, 9.2, 5.0, 5.6, 6.1, 6.9)
+)
+plot_ntl_trend(panel)
+plot_ntl_trend(panel, region = "Patna")
+\dontshow{\}) # examplesIf}
 }

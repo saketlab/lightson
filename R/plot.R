@@ -24,6 +24,11 @@
 #' @param ... Additional [ggplot2::theme()] arguments.
 #' @return A ggplot2 theme object.
 #' @export
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
+#' library(ggplot2)
+#' ggplot(data.frame(year = 2012:2020, mean_radiance = 1:9), aes(year, mean_radiance)) +
+#'   geom_line() +
+#'   theme_ntl()
 theme_ntl <- function(base_size = 12, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Install the 'ggplot2' package to use theme_ntl().", call. = FALSE)
@@ -73,12 +78,14 @@ theme_ntl <- function(base_size = 12, ...) {
 #' @param caption Optional caption string.
 #' @return A `ggplot2` object.
 #' @export
-#' @examples
-#' \dontrun{
-#' panel <- extract_panel(rasters, districts)
-#' plot_ntl_trend(panel, region = "Lucknow")
-#' plot_ntl_trend(panel, region = c("Mumbai", "Delhi", "Chennai"))
-#' }
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("scales", quietly = TRUE)
+#' panel <- data.frame(
+#'   region_id = rep(c("Lucknow", "Patna"), each = 4),
+#'   year = rep(2018:2021, 2),
+#'   mean_radiance = c(8.1, 8.6, 8.4, 9.2, 5.0, 5.6, 6.1, 6.9)
+#' )
+#' plot_ntl_trend(panel)
+#' plot_ntl_trend(panel, region = "Patna")
 plot_ntl_trend <- function(panel,
                            region = NULL,
                            title = "Nighttime lights radiance",
@@ -93,7 +100,9 @@ plot_ntl_trend <- function(panel,
 
   if (!is.data.frame(panel)) {
     stop("`panel` must be a data frame (got NULL or ", class(panel)[1], "); ",
-         "the upstream download likely failed.", call. = FALSE)
+      "the upstream download likely failed.",
+      call. = FALSE
+    )
   }
 
   df <- panel
@@ -148,7 +157,7 @@ plot_ntl_trend <- function(panel,
   "#fff8e8"
 )
 
-.ntl_bhuvan_breaks <- c(20, 80, 220)
+.ntl_bhuvan_breaks <- c(5, 25, 200)
 .ntl_bhuvan_labels <- c("< 5", "5 - 25", "26 - 200", "> 200")
 .ntl_bhuvan_colours <- c("#0a0a0a", "#7a7a8a", "#d4c84a", "#cc2200")
 
@@ -176,12 +185,13 @@ plot_ntl_trend <- function(panel,
 #'   explicitly when comparing multiple panels on the same scale.
 #' @return A `ggplot2` object.
 #' @export
-#' @examples
-#' \dontrun{
-#' rasters <- bhuvan_raster("IND", years = 2022, bbox_pad = c(0, 0, 0, 3.5))
-#' plot_ntl_map(rasters[["2022"]], dark = TRUE)
-#' plot_ntl_map(rasters[["2022"]], palette = "bhuvan")
-#' }
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("scales", quietly = TRUE)
+#' r <- terra::rast(
+#'   nrows = 20, ncols = 20, xmin = 77, xmax = 78, ymin = 28, ymax = 29,
+#'   crs = "EPSG:4326", vals = seq_len(400) / 2
+#' )
+#' plot_ntl_map(r)
+#' plot_ntl_map(r, palette = "bhuvan")
 plot_ntl_map <- function(raster,
                          polygons = NULL,
                          title = "Nighttime lights",
@@ -231,7 +241,8 @@ plot_ntl_map <- function(raster,
       df[[val_col]],
       breaks = c(-Inf, .ntl_bhuvan_breaks, Inf),
       labels = .ntl_bhuvan_labels,
-      right  = TRUE
+      # left-closed: the > 200 class is stored as 200
+      right  = FALSE
     )
   }
 
@@ -265,7 +276,7 @@ plot_ntl_map <- function(raster,
         limits = limits,
         oob = scales::squish,
         na.value = if (use_dark) "#080c14" else "transparent",
-        name = "Luminance",
+        name = "Radiance\n(nW/cm\u00B2/sr)",
         guide = ggplot2::guide_colorbar(
           barwidth       = ggplot2::unit(0.35, "cm"),
           barheight      = ggplot2::unit(4.5, "cm"),
@@ -319,7 +330,7 @@ plot_ntl_map <- function(raster,
 #' Plot a multi-year nighttime lights panel
 #'
 #' Arranges one map per year into a patchwork grid with a shared title,
-#' subtitle, and caption. A shared luminance scale is computed from the
+#' subtitle, and caption. A shared radiance scale is computed from the
 #' 99.5th percentile across all rasters so panels are directly comparable.
 #'
 #' Requires the \pkg{patchwork} package.
@@ -341,15 +352,12 @@ plot_ntl_map <- function(raster,
 #'   Default `"#E8A87C"` (warm amber).
 #' @return A `patchwork` object.
 #' @export
-#' @examples
-#' \dontrun{
-#' rasters <- bhuvan_raster("IND", years = c(2012, 2015, 2018, 2021, 2024))
-#' states <- get_india_admin("state")
-#' plot_ntl_panel(rasters,
-#'   polygons = states, title = "India at night, 2012-2024",
-#'   caption = "Source: ISRO Bhuvan NTL portal"
+#' @examplesIf requireNamespace("patchwork", quietly = TRUE) && requireNamespace("scales", quietly = TRUE)
+#' r <- terra::rast(
+#'   nrows = 20, ncols = 20, xmin = 77, xmax = 78, ymin = 28, ymax = 29,
+#'   crs = "EPSG:4326", vals = seq_len(400) / 2
 #' )
-#' }
+#' plot_ntl_panel(list("2020" = r, "2021" = r * 1.2), title = "Synthetic example")
 plot_ntl_panel <- function(rasters,
                            polygons = NULL,
                            title = "India at night",

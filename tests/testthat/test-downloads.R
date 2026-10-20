@@ -12,6 +12,12 @@ test_that("monthly acquisitions expand years and normalise dates", {
   expect_named(y, "2025-03-01")
 })
 
+test_that("acquisitions validate required arguments", {
+  expect_error(.viirs_acquisitions("annual", NULL, NULL), "years")
+  expect_error(.viirs_acquisitions("monthly", NULL, NULL), "years")
+  expect_error(.viirs_acquisitions("daily", NULL, "not-a-date"), "invalid")
+})
+
 test_that("daily acquisitions require and validate dates", {
   expect_error(.viirs_acquisitions("daily", 2025, NULL), "dates")
   x <- .viirs_acquisitions("daily", NULL, c("2025-01-02", "2025-01-03"))

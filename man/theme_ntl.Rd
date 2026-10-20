@@ -21,3 +21,11 @@ single equal-contrast grey (\verb{#767676}, ~4.5:1 against both pure black and
 pure white) so the same rendered figure reads on light and dark pages
 alike, since pkgdown bakes each figure to one static PNG at build time.
 }
+\examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+ggplot(data.frame(year = 2012:2020, mean_radiance = 1:9), aes(year, mean_radiance)) +
+  geom_line() +
+  theme_ntl()
+\dontshow{\}) # examplesIf}
+}

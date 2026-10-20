@@ -50,9 +50,12 @@ year comparisons.
 }
 }
 \examples{
-\dontrun{
-rasters <- bhuvan_raster("IND", years = 2022, bbox_pad = c(0, 0, 0, 3.5))
-plot_ntl_map(rasters[["2022"]], dark = TRUE)
-plot_ntl_map(rasters[["2022"]], palette = "bhuvan")
-}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("scales", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+r <- terra::rast(
+  nrows = 20, ncols = 20, xmin = 77, xmax = 78, ymin = 28, ymax = 29,
+  crs = "EPSG:4326", vals = seq_len(400) / 2
+)
+plot_ntl_map(r)
+plot_ntl_map(r, palette = "bhuvan")
+\dontshow{\}) # examplesIf}
 }

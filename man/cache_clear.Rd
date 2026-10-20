@@ -15,3 +15,8 @@ Invisibly returns the number of files removed.
 \description{
 Removes cached raster files downloaded by \code{ntl_download()} or \code{bhuvan_raster()}.
 }
+\examples{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+cache_clear("bhuvan")
+\dontshow{\}) # examplesIf}
+}

@@ -20,8 +20,7 @@
 #'   algorithms, so radiance estimates are not directly comparable across this
 #'   boundary. Requests spanning both collections trigger a warning.
 #' @export
-#' @examples
-#' \dontrun{
+#' @examplesIf interactive()
 #' # All states, all years
 #' df <- bhuvan_stats()
 #'
@@ -30,7 +29,6 @@
 #'
 #' # Multiple years
 #' df <- bhuvan_stats(years = 2015:2023)
-#' }
 bhuvan_stats <- function(years = NULL, state = NULL) {
   if (is.null(state)) {
     raw <- .bhuvan_get("getIndiaStats.php")
@@ -55,14 +53,25 @@ bhuvan_stats <- function(years = NULL, state = NULL) {
 #' Download Bhuvan NTL raster tiles for a region
 #'
 #' Fetches annual nighttime lights GeoTIFF tiles from the Bhuvan WMS service
-#' for a given spatial extent and converts the RGB visualization output to a
-#' single-band luminance raster.
+#' for a given spatial extent and converts the classed RGB map to a
+#' single-band radiance raster.
 #'
-#' The Bhuvan WMS returns RGB visualization rasters. Luminance is computed
-#' as `lum = 0.2126*R + 0.7152*G + 0.0722*B`
-#' (ITU-R BT.709). Values are comparable across years for trend analysis but
-#' differ in units from VIIRS nW/cm²/sr. Do not mix Bhuvan luminance and VIIRS
-#' radiance in the same regression without normalising first.
+#' The Bhuvan WMS does not serve continuous radiance. It returns a map with
+#' four colour classes, which are converted to representative radiance values
+#' in nW/cm^2/sr:
+#'
+#' | Colour     | Class     | Value |
+#' |------------|-----------|-------|
+#' | black      | < 5       | 2.5   |
+#' | blue-grey  | 5 - 25    | 15    |
+#' | cream      | 26 - 200  | 112.5 |
+#' | red        | > 200     | 200   |
+#'
+#' The first three values are class midpoints; the open-ended top class is set
+#' to its floor, so the brightest areas are underestimated. Pixels that match
+#' no class (the portal's watermark and its anti-aliased edges) are `NA`.
+#' Treat the output as coarse, banded radiance: use VIIRS from
+#' [ntl_download()] when you need continuous calibrated values.
 #'
 #' @param region An `sf` object, `SpatVector`, or ISO 3166-1 alpha-3 country
 #'   code (e.g., `"IND"`). Used to derive the WMS bounding box.
@@ -81,15 +90,13 @@ bhuvan_stats <- function(years = NULL, state = NULL) {
 #'   Bhuvan NTL data from 2024 onwards is derived from VNP46A4 **Collection
 #'   2.0**, while 2012-2023 uses the legacy **Collection 1.0**. The two
 #'   collections use different calibration and atmospheric correction
-#'   algorithms, so luminance values are not directly comparable across this
+#'   algorithms, so values are not directly comparable across this
 #'   boundary.
 #' @export
-#' @examples
-#' \dontrun{
-#' districts <- sf::read_sf("https://bharatviz.org/India-bhuvan-districts.geojson")
-#' rasters <- bhuvan_raster(districts, years = 2018:2023)
-#' panel <- extract_panel(rasters, districts)
-#' }
+#' @examplesIf interactive()
+#' states <- get_india_admin("state")
+#' rasters <- bhuvan_raster(states, years = 2021:2022)
+#' panel <- extract_panel(rasters, states, id_col = "state_name")
 bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1024,
                           bbox_pad = c(0, 0, 0, 0)) {
   .warn_collection_break(as.integer(years))
@@ -107,7 +114,8 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
   mv <- .region_mask(region)
 
   result <- lapply(as.integer(years), function(yr) {
-    key <- paste0("bhuvan_", bbox_hash, "_", yr)
+    # v2: class radiance; older cached files hold BT.709 luminance
+    key <- paste0("bhuvan_v2_", bbox_hash, "_", yr)
     path <- file.path(cache_d, paste0(key, ".tif"))
 
     if (.cache_hit(path, force)) {
@@ -121,10 +129,10 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
       return(NULL)
     }
 
-    lum <- .rgb_to_luminance(r)
-    if (!is.null(mv)) lum <- terra::mask(lum, mv)
-    terra::writeRaster(lum, path, overwrite = TRUE)
-    lum
+    rad <- .rgb_to_radiance(r)
+    if (!is.null(mv)) rad <- terra::mask(rad, mv)
+    terra::writeRaster(rad, path, overwrite = TRUE)
+    rad
   })
 
   names(result) <- as.character(years)
@@ -139,11 +147,16 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
   result
 }
 
+.bhuvan_request <- function(url) {
+  httr2::request(url) |>
+    # connect timeout only; full-India tiles can take minutes to transfer
+    httr2::req_options(connecttimeout = getOption("lightson.timeout", 30)) |>
+    httr2::req_retry(max_tries = 3, backoff = ~ 2 * .x)
+}
+
 .bhuvan_get <- function(endpoint, query = list()) {
-  url <- paste0(BHUVAN_NTL_BASE, endpoint)
-  req <- httr2::request(url)
+  req <- .bhuvan_request(paste0(BHUVAN_NTL_BASE, endpoint))
   if (length(query) > 0) req <- httr2::req_url_query(req, !!!query)
-  req <- httr2::req_retry(req, max_tries = 3, backoff = ~ 2 * .x)
 
   resp <- tryCatch(httr2::req_perform(req), error = function(e) {
     message("Bhuvan API request failed: ", conditionMessage(e))
@@ -183,7 +196,7 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
   time_str <- paste0(year, "-01-01T00:00:00.000Z")
   bbox_str <- paste(bbox[c("xmin", "ymin", "xmax", "ymax")], collapse = ",")
 
-  req <- httr2::request(BHUVAN_WMS_BASE) |>
+  req <- .bhuvan_request(BHUVAN_WMS_BASE) |>
     httr2::req_url_query(
       SERVICE     = "WMS",
       VERSION     = "1.1.1",
@@ -197,8 +210,7 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
       FORMAT      = "image/geotiff",
       TIME        = time_str,
       TRANSPARENT = "false"
-    ) |>
-    httr2::req_retry(max_tries = 3, backoff = ~ 2 * .x)
+    )
 
   resp <- tryCatch(httr2::req_perform(req), error = function(e) {
     message("Bhuvan WMS fetch failed: ", conditionMessage(e))
@@ -210,29 +222,45 @@ bhuvan_raster <- function(region, years, force = FALSE, width = 1024, height = 1
 
   raw_bytes <- httr2::resp_body_raw(resp)
   tmp <- tempfile(fileext = ".tif")
+  tmp_raw <- tempfile(fileext = ".vrt")
   writeBin(raw_bytes, tmp)
   r <- tryCatch(
     {
-      disk_r <- terra::rast(tmp)
-      vals <- terra::values(disk_r)
-      mem_r <- terra::rast(disk_r)
-      terra::values(mem_r) <- vals
-      mem_r
+      # nodata=0 per band would erase pure black and red pixels
+      sf::gdal_utils("translate", tmp, tmp_raw, options = c("-of", "VRT", "-a_nodata", "none"))
+      terra::toMemory(terra::rast(tmp_raw))
     },
     error = function(e) {
       message("Failed to parse WMS response as GeoTIFF: ", conditionMessage(e))
       NULL
     }
   )
-  unlink(tmp)
+  unlink(c(tmp, tmp_raw))
   r
 }
 
-.rgb_to_luminance <- function(r) {
+# class midpoints; open-ended > 200 class uses its floor
+.bhuvan_classes <- data.frame(
+  red = c(0, 71, 245, 255),
+  green = c(0, 71, 235, 0),
+  blue = c(0, 95, 166, 0),
+  radiance = c(2.5, 15, 112.5, 200)
+)
+
+# off-legend pixels (background, watermark, anti-aliasing) become NA
+.rgb_to_radiance <- function(r, tol = 8) {
   if (terra::nlyr(r) < 3) {
     return(r)
   }
-  lum <- 0.2126 * r[[1]] + 0.7152 * r[[2]] + 0.0722 * r[[3]]
-  mask <- (r[[1]] == 255) & (r[[2]] == 255) & (r[[3]] == 255)
-  terra::mask(lum, mask, maskvalue = TRUE)
+  v <- terra::values(r)
+  out <- rep(NA_real_, nrow(v))
+  for (i in seq_len(nrow(.bhuvan_classes))) {
+    k <- .bhuvan_classes[i, ]
+    hit <- abs(v[, 1] - k$red) <= tol & abs(v[, 2] - k$green) <= tol &
+      abs(v[, 3] - k$blue) <= tol
+    out[hit %in% TRUE] <- k$radiance
+  }
+  rad <- terra::rast(r, nlyrs = 1)
+  terra::values(rad) <- out
+  rad
 }

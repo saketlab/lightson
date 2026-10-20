@@ -98,7 +98,7 @@ ntl_download <- function(region, years = NULL, token, force = FALSE,
     x <- lapply(as.integer(years), function(y) seq(as.Date(sprintf("%d-01-01", y)), as.Date(sprintf("%d-12-01", y)), by = "month"))
     dates <- do.call(c, x)
   }
-  x <- as.Date(dates)
+  x <- tryCatch(as.Date(dates), error = function(e) as.Date(NA))
   if (anyNA(x)) stop("`dates` contains invalid dates.", call. = FALSE)
   if (product == "monthly") x <- as.Date(format(x, "%Y-%m-01"))
   x <- unique(x)

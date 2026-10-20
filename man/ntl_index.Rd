@@ -35,3 +35,11 @@ Converts each group's values to an index where its baseline observation is
 100. This is useful for comparing changes between sources with different
 units, but does not make their absolute levels comparable.
 }
+\examples{
+panel <- data.frame(
+  region_id = rep(c("a", "b"), each = 3),
+  year = rep(2020:2022, 2),
+  mean_radiance = c(10, 12, 15, 4, 4, 5)
+)
+ntl_index(panel, baseline = 2020)
+}

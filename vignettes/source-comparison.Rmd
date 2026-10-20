@@ -26,7 +26,7 @@ analysis. Do not append their raw values into a single time series.
 
 | Source/product | Coverage | Cadence | Approx. resolution | Values | Authentication |
 |---|---:|---:|---:|---|---|
-| ISRO Bhuvan NTL | 2012--2024 | Annual | 500 m | RGB-derived BT.709 luminance | None |
+| ISRO Bhuvan NTL | 2012--2024 | Annual | 500 m | Classed radiance (4 bands) | None |
 | NASA VNP46A4 | 2012--2025 | Annual | 500 m | Radiance, nW/cm^2/sr | Earthdata token |
 | NASA VNP46A3 | 2012--present | Monthly | 500 m | Radiance, nW/cm^2/sr | Earthdata token |
 | NASA VNP46A2 | 2012--near-present | Daily | 500 m | Radiance, nW/cm^2/sr | Earthdata token |
@@ -39,8 +39,8 @@ reproducibility depends on an exact latest date.
 
 Bhuvan is convenient when an unauthenticated India-only workflow matters. Its
 state statistics endpoint returns physical radiance statistics, but its WMS
-serves rendered RGB imagery. `bhuvan_raster()` therefore converts WMS colours
-to dimensionless luminance; it cannot recover the original radiance.
+serves a four-class colour map. `bhuvan_raster()` converts each class to a
+representative radiance, so it cannot recover continuous values.
 
 The examples below use a handful of states over 2021-2022 and the bundled LGD
 state boundaries, keeping every fetch small.
@@ -106,7 +106,7 @@ viirs_panel$units <- "nW/cm^2/sr"
 
 bhuvan_panel <- extract_panel(bhuvan_maps, states_sel, id_col = "state_name")
 bhuvan_panel$source <- "ISRO Bhuvan WMS"
-bhuvan_panel$units <- "BT.709 luminance"
+bhuvan_panel$units <- "Classed radiance"
 ```
 
 Raw levels cannot be compared because the units differ. A useful diagnostic is
@@ -140,7 +140,7 @@ ggplot(comparison, aes(year, index_2021, colour = source)) +
   theme(legend.position = "bottom")
 ```
 
-![plot of chunk indexed-comparison](figure/indexed-comparison-1.png)
+![plot of chunk indexed-comparison](source-comparison-fig/indexed-comparison-1.png)
 
 Check whether conclusions depend on the source instead of relying only on the
 figure. The following produces one correlation per state across the two

@@ -12,8 +12,12 @@ vignette: >
 
 ```{r setup, include = FALSE}
 library(lightson)
-rasters <- tryCatch(bhuvan_raster("IND", years = 2020:2022), error = function(e) list())
-live_ok <- length(rasters) > 0
+# Live downloads write to the user cache, so skip them on CRAN.
+live_ok <- identical(Sys.getenv("NOT_CRAN"), "true")
+if (live_ok) {
+  rasters <- tryCatch(bhuvan_raster("IND", years = 2020:2022), error = function(e) list())
+  live_ok <- length(rasters) > 0
+}
 
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -24,7 +28,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r offline-notice, echo = FALSE, results = "asis", eval = !live_ok}
-cat("_The ISRO Bhuvan WMS was unreachable when this vignette was built, so its live-data examples were skipped. Run this vignette locally to see the output._")
+cat("_Live data were not downloaded when this vignette was built, so its examples were not run. Run this vignette locally to see the output._")
 ```
 
 `lightson` accepts any `sf` polygon layer. The workflow below starts with the
@@ -49,10 +53,10 @@ names(rasters)
 rasters[["2022"]]
 ```
 
-Bhuvan WMS returns RGB visualisation tiles. `bhuvan_raster()` converts
-these to single-band luminance via
-`lum = 0.2126*R + 0.7152*G + 0.0722*B` (ITU-R BT.709). Values are
-comparable across years for trend analysis but are not in nW/cm^2/sr.
+Bhuvan WMS returns a classed map with four colours (< 5, 5-25,
+26-200 and > 200 nW/cm^2/sr). `bhuvan_raster()` converts each class to a representative
+radiance (2.5, 15, 112.5 and 200), so values are banded rather than
+continuous, and the brightest class is a floor.
 
 ```{r state-panel}
 panel <- extract_panel(rasters, states, id_col = "state_name")

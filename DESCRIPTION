@@ -1,14 +1,19 @@
 Package: lightson
 Title: Download and Analyse Nighttime Lights Satellite Data
-Version: 0.1.1
+Version: 0.2.0
 Authors@R:
     person("Saket", "Choudhary",
            email = "saketc@iitb.ac.in",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-5202-7633"))
-Description: Downloads and processes nighttime lights (NTL) satellite data
-    from NASA VIIRS/Black Marble (daily, monthly, and annual composites)
-    and India's ISRO Bhuvan NTL portal.
+Description: Downloads and processes nighttime lights satellite data from
+    the 'NASA' 'VIIRS' Black Marble product suite (daily, monthly, and
+    annual composites; Roman et al. (2018) <doi:10.1016/j.rse.2018.03.017>)
+    served by the 'LAADS DAAC' archive
+    <https://ladsweb.modaps.eosdis.nasa.gov>, and from the Indian Space
+    Research Organisation's 'Bhuvan' nighttime lights portal. Provides
+    zonal statistics over arbitrary polygons, returning tidy region-by-time
+    panels, along with plotting helpers.
 License: MIT + file LICENSE
 Depends: R (>= 4.1.0)
 Encoding: UTF-8
@@ -24,14 +29,12 @@ Suggests:
     ggplot2,
     patchwork,
     scales,
-    httptest2,
-    pkgdown,
     withr,
-    testthat (>= 3.0.0),
+    testthat (>= 3.1.7),
     knitr,
     rmarkdown
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://lightson.saketlab.org, https://github.com/saketlab/lightson
 BugReports: https://github.com/saketlab/lightson/issues
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.1

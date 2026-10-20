@@ -1,5 +1,3 @@
-source(test_path("fixtures", "synthetic_raster.R"))
-
 test_that("extract_panel returns correct structure", {
   r1 <- make_raster(vals = rep(10, 100))
   r2 <- make_raster(vals = rep(20, 100))

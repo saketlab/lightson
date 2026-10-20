@@ -50,19 +50,18 @@ A \code{patchwork} object.
 }
 \description{
 Arranges one map per year into a patchwork grid with a shared title,
-subtitle, and caption. A shared luminance scale is computed from the
+subtitle, and caption. A shared radiance scale is computed from the
 99.5th percentile across all rasters so panels are directly comparable.
 }
 \details{
 Requires the \pkg{patchwork} package.
 }
 \examples{
-\dontrun{
-rasters <- bhuvan_raster("IND", years = c(2012, 2015, 2018, 2021, 2024))
-states <- get_india_admin("state")
-plot_ntl_panel(rasters,
-  polygons = states, title = "India at night, 2012-2024",
-  caption = "Source: ISRO Bhuvan NTL portal"
+\dontshow{if (requireNamespace("patchwork", quietly = TRUE) && requireNamespace("scales", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+r <- terra::rast(
+  nrows = 20, ncols = 20, xmin = 77, xmax = 78, ymin = 28, ymax = 29,
+  crs = "EPSG:4326", vals = seq_len(400) / 2
 )
-}
+plot_ntl_panel(list("2020" = r, "2021" = r * 1.2), title = "Synthetic example")
+\dontshow{\}) # examplesIf}
 }

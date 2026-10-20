@@ -17,13 +17,13 @@
 #' @return An `sf` object.
 #' @export
 #' @examples
-#' \dontrun{
+#' # Bundled state boundaries (no download)
 #' states <- get_india_admin("state")
+#' head(states)
+#' @examplesIf interactive()
+#' # Downloads from GADM or Bhuvan
 #' districts <- get_india_admin("district")
-#'
-#' # custom boundary:
-#' districts <- sf::read_sf("https://bharatviz.org/India-bhuvan-districts.geojson")
-#' }
+#' districts <- get_india_admin("district", source = "bhuvan")
 get_india_admin <- function(level = c("country", "state", "district"),
                             source = c("gadm", "bhuvan")) {
   level <- match.arg(level)

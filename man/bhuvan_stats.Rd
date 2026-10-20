@@ -36,7 +36,7 @@ boundary. Requests spanning both collections trigger a warning.
 }
 
 \examples{
-\dontrun{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # All states, all years
 df <- bhuvan_stats()
 
@@ -45,5 +45,5 @@ df <- bhuvan_stats(state = "BIHAR")
 
 # Multiple years
 df <- bhuvan_stats(years = 2015:2023)
-}
+\dontshow{\}) # examplesIf}
 }

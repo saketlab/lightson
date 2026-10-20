@@ -42,6 +42,8 @@ BHUVAN_WMS_LAYER <- "ntl:BhuvanNTL"
 #' @param source One of `"viirs"`, `"bhuvan"`, or `NULL`.
 #' @return Invisibly returns the number of files removed.
 #' @export
+#' @examplesIf interactive()
+#' cache_clear("bhuvan")
 cache_clear <- function(source = NULL) {
   d <- .cache_dir()
   pattern <- if (is.null(source)) ".*\\.tif$" else paste0("^", source, "_.*\\.tif$")
@@ -70,6 +72,13 @@ cache_clear <- function(source = NULL) {
 #' @param index_col Name for the new index column.
 #' @return `panel` with an additional numeric index column.
 #' @export
+#' @examples
+#' panel <- data.frame(
+#'   region_id = rep(c("a", "b"), each = 3),
+#'   year = rep(2020:2022, 2),
+#'   mean_radiance = c(10, 12, 15, 4, 4, 5)
+#' )
+#' ntl_index(panel, baseline = 2020)
 ntl_index <- function(panel, baseline, group_cols = NULL, time_col = "year",
                       value_col = "mean_radiance", index_col = "ntl_index") {
   needed <- c(time_col, value_col)
@@ -113,6 +122,16 @@ ntl_index <- function(panel, baseline, group_cols = NULL, time_col = "year",
 #' @param method Correlation method passed to [stats::cor()].
 #' @return Data frame with region, correlation, and paired observation count.
 #' @export
+#' @examples
+#' x <- data.frame(
+#'   region_id = rep(c("a", "b"), each = 3), year = rep(2020:2022, 2),
+#'   mean_radiance = c(1, 2, 3, 2, 4, 6)
+#' )
+#' y <- data.frame(
+#'   region_id = rep(c("a", "b"), each = 3), year = rep(2020:2022, 2),
+#'   mean_radiance = c(2, 4, 7, 6, 4, 2)
+#' )
+#' ntl_source_agreement(x, y)
 ntl_source_agreement <- function(x, y, id_col = "region_id", time_col = "year",
                                  value_col = "mean_radiance",
                                  method = c("pearson", "spearman", "kendall")) {

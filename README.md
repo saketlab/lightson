@@ -1,4 +1,7 @@
-# lightson
+# lightson <img src="man/figures/logo.png" align="right" height="139" alt="lightson logo" />
+
+[![R-CMD-check](https://github.com/saketlab/lightson/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/saketlab/lightson/actions/workflows/R-CMD-check.yaml)
+
 Download and analyse nighttime lights satellite data from R. 
 
 `lightson` supports two data sources:
@@ -40,7 +43,7 @@ states <- c("Bihar", "Maharashtra", "Tamil Nadu", "Uttar Pradesh", "Kerala")
 plot_ntl_trend(
   df[df$state %in% states, ],
   region   = states,
-  subtitle = "Bhuvan NTL luminance (ITU-R BT.709)",
+  subtitle = "Bhuvan state mean radiance (nW/cm^2/sr)",
   caption  = "Source: ISRO Bhuvan NTL portal"
 )
 ```
@@ -106,8 +109,7 @@ You can also set `EARTHDATA_USERNAME` and `EARTHDATA_PASSWORD` in `~/.Renviron` 
 
 ## Units and comparability
 
-Bhuvan WMS rasters are RGB visualisation tiles. `bhuvan_raster()` converts them to ITU-R BT.709 luminance (`0.2126R + 0.7152G + 0.0722B`). The values are dimensionless and can be used for trend analysis, but not in physical radiance units. 
-Don't mix them with VIIRS radiance in a regression without normalising first.
+Bhuvan WMS rasters are classed maps with four colours (< 5, 5-25, 26-200 and > 200 nW/cm^2/sr). `bhuvan_raster()` converts each class to a representative radiance: the midpoints 2.5, 15 and 112.5, and 200 (the floor) for the open-ended top class. These are banded values, so the brightest areas are underestimated. Use VIIRS when you need continuous calibrated radiance, and don't pool the two sources in a regression without normalising first.
 
 Bhuvan NTL data from 2024 onwards uses VNP46A4 Collection 2.0; 2012-2023 uses Collection 1.0. 
 The two collections use different calibration algorithms, so estimates aren't directly comparable across that boundary.

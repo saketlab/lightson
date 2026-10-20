@@ -8,14 +8,20 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-bhuvan_up <- tryCatch(lightson::bhuvan_stats(years = 2024), error = function(e) NULL)
+# Live downloads write to the user cache, so skip them on CRAN.
+live_ok <- identical(Sys.getenv("NOT_CRAN"), "true") &&
+  !is.null(tryCatch(lightson::bhuvan_stats(years = 2024), error = function(e) NULL))
 
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment  = "#>",
   dev.args = list(bg = "transparent"),
-  eval     = !is.null(bhuvan_up)
+  eval     = live_ok
 )
+```
+
+```{r offline-notice, echo = FALSE, results = "asis", eval = !live_ok}
+cat("_Live data were not downloaded when this vignette was built, so its examples were not run. Run this vignette locally to see the output._")
 ```
 
 
@@ -57,7 +63,7 @@ states <- c("Bihar", "Maharashtra", "Tamil Nadu", "Uttar Pradesh", "Kerala")
 plot_ntl_trend(
   df[df$state %in% states, ],
   region   = states,
-  subtitle = "Bhuvan NTL luminance (ITU-R BT.709)",
+  subtitle = "Bhuvan state mean radiance (nW/cm^2/sr)",
   caption  = "Source: ISRO Bhuvan NTL portal"
 )
 ```
@@ -76,18 +82,18 @@ rasters <- tryCatch(
 ```
 
 
-```{r, fig.width = 11, fig.height = 8, eval = length(rasters) > 0}
+```{r, fig.width = 11, fig.height = 8, eval = live_ok && length(rasters) > 0}
 plot_ntl_panel(
   rasters,
   polygons = states_sf,
   title    = "India at night, 2012 to 2024",
-  subtitle = "Bhuvan NTL luminance (ITU-R BT.709). Boundaries: LGD/SoI.",
+  subtitle = "Bhuvan NTL radiance classes. Boundaries: LGD/SoI.",
   caption  = "Source: ISRO Bhuvan NTL portal",
   ncol     = 3L
 )
 ```
 
-All panels are drawn at the same luminance scale (reference zero). The
+All panels are drawn at the same radiance scale (reference zero). The
 sharpest gains are in Bihar, UP, and Odisha after 2015, broadly tracking the
 Saubhagya electrification scheme (2017-2019).
 

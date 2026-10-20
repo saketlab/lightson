@@ -9,3 +9,6 @@
 ^GOALS\.md$
 ^LICENSE\.md$
 ^vignettes/.*\.Rmd\.orig$
+^CLAUDE\.md$
+^cran-comments\.md$
+^data-raw$

@@ -32,11 +32,12 @@ For custom boundaries, load your own file with \code{sf::read_sf()} and pass it
 directly to \code{\link[=extract_panel]{extract_panel()}}.
 }
 \examples{
-\dontrun{
+# Bundled state boundaries (no download)
 states <- get_india_admin("state")
+head(states)
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+# Downloads from GADM or Bhuvan
 districts <- get_india_admin("district")
-
-# custom boundary:
-districts <- sf::read_sf("https://bharatviz.org/India-bhuvan-districts.geojson")
-}
+districts <- get_india_admin("district", source = "bhuvan")
+\dontshow{\}) # examplesIf}
 }

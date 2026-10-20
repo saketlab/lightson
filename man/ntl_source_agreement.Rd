@@ -32,3 +32,14 @@ Aligns observations by region and time, then calculates within-region
 correlation between two sources. Correlation compares co-movement, not
 absolute levels or units.
 }
+\examples{
+x <- data.frame(
+  region_id = rep(c("a", "b"), each = 3), year = rep(2020:2022, 2),
+  mean_radiance = c(1, 2, 3, 2, 4, 6)
+)
+y <- data.frame(
+  region_id = rep(c("a", "b"), each = 3), year = rep(2020:2022, 2),
+  mean_radiance = c(2, 4, 7, 6, 4, 2)
+)
+ntl_source_agreement(x, y)
+}

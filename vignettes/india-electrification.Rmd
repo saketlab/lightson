@@ -25,7 +25,8 @@ knitr::opts_chunk$set(
 2. Go to Profile → Generate Token
 3. `Sys.setenv(EARTHDATA_TOKEN = "YOUR_TOKEN")`, or pass the token directly to `earthdata_token("TOKEN")`
 
-Tiles are cached in `~/.lightson/cache/` after the first download.
+Tiles are cached in `tools::R_user_dir("lightson", "cache")` after the first
+download; `cache_clear()` removes them.
 
 ## Quick workflow
 

@@ -36,29 +36,40 @@ fetch fails for any requested year.
 }
 \description{
 Fetches annual nighttime lights GeoTIFF tiles from the Bhuvan WMS service
-for a given spatial extent and converts the RGB visualization output to a
-single-band luminance raster.
+for a given spatial extent and converts the classed RGB map to a
+single-band radiance raster.
 }
 \details{
-The Bhuvan WMS returns RGB visualization rasters. Luminance is computed
-as \code{lum = 0.2126*R + 0.7152*G + 0.0722*B}
-(ITU-R BT.709). Values are comparable across years for trend analysis but
-differ in units from VIIRS nW/cm²/sr. Do not mix Bhuvan luminance and VIIRS
-radiance in the same regression without normalising first.
+The Bhuvan WMS does not serve continuous radiance. It returns a map with
+four colour classes, which are converted to representative radiance values
+in nW/cm^2/sr:\tabular{lll}{
+   Colour \tab Class \tab Value \cr
+   black \tab < 5 \tab 2.5 \cr
+   blue-grey \tab 5 - 25 \tab 15 \cr
+   cream \tab 26 - 200 \tab 112.5 \cr
+   red \tab > 200 \tab 200 \cr
+}
+
+
+The first three values are class midpoints; the open-ended top class is set
+to its floor, so the brightest areas are underestimated. Pixels that match
+no class (the portal's watermark and its anti-aliased edges) are \code{NA}.
+Treat the output as coarse, banded radiance: use VIIRS from
+\code{\link[=ntl_download]{ntl_download()}} when you need continuous calibrated values.
 }
 \section{Collection break}{
 
 Bhuvan NTL data from 2024 onwards is derived from VNP46A4 \strong{Collection
 2.0}, while 2012-2023 uses the legacy \strong{Collection 1.0}. The two
 collections use different calibration and atmospheric correction
-algorithms, so luminance values are not directly comparable across this
+algorithms, so values are not directly comparable across this
 boundary.
 }
 
 \examples{
-\dontrun{
-districts <- sf::read_sf("https://bharatviz.org/India-bhuvan-districts.geojson")
-rasters <- bhuvan_raster(districts, years = 2018:2023)
-panel <- extract_panel(rasters, districts)
-}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
+states <- get_india_admin("state")
+rasters <- bhuvan_raster(states, years = 2021:2022)
+panel <- extract_panel(rasters, states, id_col = "state_name")
+\dontshow{\}) # examplesIf}
 }
