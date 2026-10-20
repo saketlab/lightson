@@ -34,7 +34,7 @@ get_india_admin <- function(level = c("country", "state", "district"),
     if (!.has_value(path)) {
       stop("Bundled state boundaries not found. Re-install the lightson package.", call. = FALSE)
     }
-    return(sf::read_sf(path))
+    return(sf::st_read(path, quiet = TRUE))
   }
 
   gadm_level <- switch(level,
@@ -110,5 +110,5 @@ get_india_admin <- function(level = c("country", "state", "district"),
 .bhuvan_json_to_sf <- function(raw) {
   tmp <- tempfile(fileext = ".geojson")
   writeLines(jsonlite::toJSON(raw, auto_unbox = TRUE), tmp)
-  sf::read_sf(tmp)
+  sf::st_read(tmp, quiet = TRUE)
 }
